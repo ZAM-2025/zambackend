@@ -16,10 +16,10 @@ import java.util.Iterator;
 import java.util.logging.Logger;
 
 @RestController
+@CrossOrigin(origins = "*")
 public class WebCaptchaController {
     private static ArrayList<Captcha> captchas = new ArrayList<>();
 
-    @CrossOrigin(origins = "http://localhost:8000")
     @GetMapping("/getCaptcha")
     public WebCaptchaRequest getCaptcha() {
         try {
@@ -33,7 +33,6 @@ public class WebCaptchaController {
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:8000")
     @GetMapping("/validateCaptcha")
     public WebCaptchaValidation validateCaptcha(@RequestParam String id, @RequestParam String match) {
         // Liberiamoci dei captcha scaduti prima di tutto
@@ -63,7 +62,6 @@ public class WebCaptchaController {
         return new WebCaptchaValidation(false, id, LocalDateTime.now(), "No such Captcha");
     }
 
-    @CrossOrigin(origins = "http://localhost:8000")
     @GetMapping(value = "/getCaptchaImage", produces = MediaType.IMAGE_PNG_VALUE)
     public @ResponseBody byte[] getCaptchaImage(@RequestParam String id) throws IOException {
         for (Captcha c : captchas) {
