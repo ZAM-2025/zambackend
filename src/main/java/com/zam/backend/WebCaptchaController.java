@@ -10,7 +10,9 @@ import java.awt.image.DataBufferByte;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.logging.Logger;
 
 @RestController
@@ -34,17 +36,30 @@ public class WebCaptchaController {
     @CrossOrigin(origins = "http://localhost:8000")
     @GetMapping("/validateCaptcha")
     public WebCaptchaValidation validateCaptcha(@RequestParam String id, @RequestParam String match) {
+        // Liberiamoci dei captcha scaduti prima di tutto
+        LocalDateTime now = LocalDateTime.now();
+
+        Iterator<Captcha> iterator = captchas.iterator();
+        while(iterator.hasNext()) {
+            Captcha captcha = iterator.next();
+            if(captcha.getTimestamp().isBefore(now.minus(5, ChronoUnit.MINUTES))) {
+                iterator.remove();
+            }
+        }
+
         for(Captcha captcha : captchas) {
             if(captcha.getId().equals(id)) {
                 if(captcha.getMatch().equals(match)) {
                     captchas.removeIf(c -> c.getId().equals(id));
                     return new WebCaptchaValidation(true, id, LocalDateTime.now(), "OK");
                 } else {
+                    captchas.removeIf(c -> c.getId().equals(id));
                     return new WebCaptchaValidation(false, id, LocalDateTime.now(), "Captcha does not match");
                 }
             }
         }
 
+        captchas.removeIf(c -> c.getId().equals(id));
         return new WebCaptchaValidation(false, id, LocalDateTime.now(), "No such Captcha");
     }
 
