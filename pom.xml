@@ -28,6 +28,7 @@
     </scm>
     <properties>
         <java.version>23</java.version>
+        <start-class>com.zam.backend.ZambackendApplication</start-class>
     </properties>
     <dependencies>
         <dependency>
