@@ -11,6 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 @RestController
 public class WebCaptchaController {
@@ -18,10 +19,15 @@ public class WebCaptchaController {
 
     @GetMapping("/getCaptcha")
     public WebCaptchaRequest getCaptcha() {
-        Captcha captcha = new Captcha();
-        captchas.add(captcha);
-        return new WebCaptchaRequest(captcha.getId(), "/getCaptchaImage?id=" + captcha.getId(),
-                LocalDateTime.now());
+        try {
+            Captcha captcha = new Captcha();
+            captchas.add(captcha);
+            return new WebCaptchaRequest(true, captcha.getId(), "/getCaptchaImage?id=" + captcha.getId(),
+                    LocalDateTime.now());
+        } catch(Exception e) {
+            Logger.getGlobal().severe("getCaptcha failed with " + e.getMessage());
+            return new WebCaptchaRequest(false, e.getMessage(), "", LocalDateTime.now());
+        }
     }
 
     @GetMapping("/validateCaptcha")
