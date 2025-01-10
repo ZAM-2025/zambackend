@@ -50,6 +50,12 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.zam.captcha</groupId>
+            <artifactId>zamcaptcha</artifactId>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/zamcaptcha.jar</systemPath>
+        </dependency>
     </dependencies>
 
     <build>
