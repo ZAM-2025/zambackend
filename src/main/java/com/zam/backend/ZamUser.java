@@ -23,9 +23,9 @@ public class ZamUser {
     @Column(name = "tipo", columnDefinition = "tipoutente")
     private ZamUserType tipo;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @ColumnDefault("nextval('utente_coordinatore_seq')")
-    @JoinColumn(name = "coordinatore", nullable = false)
+    @JoinColumn(name = "coordinatore", nullable = true)
     private ZamUser coordinatore;
 
     protected ZamUser() {}
