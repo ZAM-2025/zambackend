@@ -31,7 +31,6 @@ jobs:
         with:
           java-version: '23'
           distribution: 'temurin'
-          cache: maven
 
       - name: Maven Clean
         run: mvn clean
