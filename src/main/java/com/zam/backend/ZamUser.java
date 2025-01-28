@@ -1,13 +1,11 @@
 package com.zam.backend;
 
-import io.hypersistence.utils.hibernate.type.basic.PostgreSQLEnumType;
 import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "utente")
-@Convert(attributeName = "tipoutente", converter = PostgreSQLEnumType.class)
 public class ZamUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
