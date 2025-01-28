@@ -17,47 +17,7 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: _statoasset; Type: TYPE; Schema: public; Owner: matteofo
---
-
-CREATE TYPE public._statoasset AS ENUM (
-    'occ',
-    'lib',
-    'np'
-);
-
-
-ALTER TYPE public._statoasset OWNER TO matteofo;
-
---
--- Name: _tipoasset; Type: TYPE; Schema: public; Owner: matteofo
---
-
-CREATE TYPE public._tipoasset AS ENUM (
-    'a',
-    'a2',
-    'b',
-    'c'
-);
-
-
-ALTER TYPE public._tipoasset OWNER TO matteofo;
-
---
--- Name: _tipoutente; Type: TYPE; Schema: public; Owner: matteofo
---
-
-CREATE TYPE public._tipoutente AS ENUM (
-    'dip',
-    'cor',
-    'ges'
-);
-
-
-ALTER TYPE public._tipoutente OWNER TO matteofo;
-
---
--- Name: statoasset; Type: TYPE; Schema: public; Owner: matteofo
+-- Name: statoasset; Type: TYPE; Schema: public; Owner: zam
 --
 
 CREATE TYPE public.statoasset AS ENUM (
@@ -67,10 +27,10 @@ CREATE TYPE public.statoasset AS ENUM (
 );
 
 
-ALTER TYPE public.statoasset OWNER TO matteofo;
+ALTER TYPE public.statoasset OWNER TO zam;
 
 --
--- Name: tipoasset; Type: TYPE; Schema: public; Owner: matteofo
+-- Name: tipoasset; Type: TYPE; Schema: public; Owner: zam
 --
 
 CREATE TYPE public.tipoasset AS ENUM (
@@ -81,10 +41,10 @@ CREATE TYPE public.tipoasset AS ENUM (
 );
 
 
-ALTER TYPE public.tipoasset OWNER TO matteofo;
+ALTER TYPE public.tipoasset OWNER TO zam;
 
 --
--- Name: tipoutente; Type: TYPE; Schema: public; Owner: matteofo
+-- Name: tipoutente; Type: TYPE; Schema: public; Owner: zam
 --
 
 CREATE TYPE public.tipoutente AS ENUM (
@@ -94,14 +54,14 @@ CREATE TYPE public.tipoutente AS ENUM (
 );
 
 
-ALTER TYPE public.tipoutente OWNER TO matteofo;
+ALTER TYPE public.tipoutente OWNER TO zam;
 
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- Name: asset; Type: TABLE; Schema: public; Owner: matteofo
+-- Name: asset; Type: TABLE; Schema: public; Owner: zam
 --
 
 CREATE TABLE public.asset (
@@ -111,10 +71,10 @@ CREATE TABLE public.asset (
 );
 
 
-ALTER TABLE public.asset OWNER TO matteofo;
+ALTER TABLE public.asset OWNER TO zam;
 
 --
--- Name: asset_id_seq; Type: SEQUENCE; Schema: public; Owner: matteofo
+-- Name: asset_id_seq; Type: SEQUENCE; Schema: public; Owner: zam
 --
 
 CREATE SEQUENCE public.asset_id_seq
@@ -126,17 +86,17 @@ CREATE SEQUENCE public.asset_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.asset_id_seq OWNER TO matteofo;
+ALTER TABLE public.asset_id_seq OWNER TO zam;
 
 --
--- Name: asset_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: matteofo
+-- Name: asset_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: zam
 --
 
 ALTER SEQUENCE public.asset_id_seq OWNED BY public.asset.id;
 
 
 --
--- Name: prenotazione; Type: TABLE; Schema: public; Owner: matteofo
+-- Name: prenotazione; Type: TABLE; Schema: public; Owner: zam
 --
 
 CREATE TABLE public.prenotazione (
@@ -149,10 +109,10 @@ CREATE TABLE public.prenotazione (
 );
 
 
-ALTER TABLE public.prenotazione OWNER TO matteofo;
+ALTER TABLE public.prenotazione OWNER TO zam;
 
 --
--- Name: prenotare_id_asset_seq; Type: SEQUENCE; Schema: public; Owner: matteofo
+-- Name: prenotare_id_asset_seq; Type: SEQUENCE; Schema: public; Owner: zam
 --
 
 CREATE SEQUENCE public.prenotare_id_asset_seq
@@ -164,17 +124,17 @@ CREATE SEQUENCE public.prenotare_id_asset_seq
     CACHE 1;
 
 
-ALTER TABLE public.prenotare_id_asset_seq OWNER TO matteofo;
+ALTER TABLE public.prenotare_id_asset_seq OWNER TO zam;
 
 --
--- Name: prenotare_id_asset_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: matteofo
+-- Name: prenotare_id_asset_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: zam
 --
 
 ALTER SEQUENCE public.prenotare_id_asset_seq OWNED BY public.prenotazione.id_asset;
 
 
 --
--- Name: prenotare_id_seq; Type: SEQUENCE; Schema: public; Owner: matteofo
+-- Name: prenotare_id_seq; Type: SEQUENCE; Schema: public; Owner: zam
 --
 
 CREATE SEQUENCE public.prenotare_id_seq
@@ -186,17 +146,17 @@ CREATE SEQUENCE public.prenotare_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.prenotare_id_seq OWNER TO matteofo;
+ALTER TABLE public.prenotare_id_seq OWNER TO zam;
 
 --
--- Name: prenotare_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: matteofo
+-- Name: prenotare_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: zam
 --
 
 ALTER SEQUENCE public.prenotare_id_seq OWNED BY public.prenotazione.id;
 
 
 --
--- Name: prenotare_id_utente_seq; Type: SEQUENCE; Schema: public; Owner: matteofo
+-- Name: prenotare_id_utente_seq; Type: SEQUENCE; Schema: public; Owner: zam
 --
 
 CREATE SEQUENCE public.prenotare_id_utente_seq
@@ -208,17 +168,17 @@ CREATE SEQUENCE public.prenotare_id_utente_seq
     CACHE 1;
 
 
-ALTER TABLE public.prenotare_id_utente_seq OWNER TO matteofo;
+ALTER TABLE public.prenotare_id_utente_seq OWNER TO zam;
 
 --
--- Name: prenotare_id_utente_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: matteofo
+-- Name: prenotare_id_utente_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: zam
 --
 
 ALTER SEQUENCE public.prenotare_id_utente_seq OWNED BY public.prenotazione.id_utente;
 
 
 --
--- Name: utente; Type: TABLE; Schema: public; Owner: matteofo
+-- Name: utente; Type: TABLE; Schema: public; Owner: zam
 --
 
 CREATE TABLE public.utente (
@@ -232,10 +192,10 @@ CREATE TABLE public.utente (
 );
 
 
-ALTER TABLE public.utente OWNER TO matteofo;
+ALTER TABLE public.utente OWNER TO zam;
 
 --
--- Name: utente_coordinatore_seq; Type: SEQUENCE; Schema: public; Owner: matteofo
+-- Name: utente_coordinatore_seq; Type: SEQUENCE; Schema: public; Owner: zam
 --
 
 CREATE SEQUENCE public.utente_coordinatore_seq
@@ -247,17 +207,17 @@ CREATE SEQUENCE public.utente_coordinatore_seq
     CACHE 1;
 
 
-ALTER TABLE public.utente_coordinatore_seq OWNER TO matteofo;
+ALTER TABLE public.utente_coordinatore_seq OWNER TO zam;
 
 --
--- Name: utente_coordinatore_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: matteofo
+-- Name: utente_coordinatore_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: zam
 --
 
 ALTER SEQUENCE public.utente_coordinatore_seq OWNED BY public.utente.coordinatore;
 
 
 --
--- Name: utente_id_seq; Type: SEQUENCE; Schema: public; Owner: matteofo
+-- Name: utente_id_seq; Type: SEQUENCE; Schema: public; Owner: zam
 --
 
 CREATE SEQUENCE public.utente_id_seq
@@ -269,59 +229,59 @@ CREATE SEQUENCE public.utente_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.utente_id_seq OWNER TO matteofo;
+ALTER TABLE public.utente_id_seq OWNER TO zam;
 
 --
--- Name: utente_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: matteofo
+-- Name: utente_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: zam
 --
 
 ALTER SEQUENCE public.utente_id_seq OWNED BY public.utente.id;
 
 
 --
--- Name: asset id; Type: DEFAULT; Schema: public; Owner: matteofo
+-- Name: asset id; Type: DEFAULT; Schema: public; Owner: zam
 --
 
 ALTER TABLE ONLY public.asset ALTER COLUMN id SET DEFAULT nextval('public.asset_id_seq'::regclass);
 
 
 --
--- Name: prenotazione id; Type: DEFAULT; Schema: public; Owner: matteofo
+-- Name: prenotazione id; Type: DEFAULT; Schema: public; Owner: zam
 --
 
 ALTER TABLE ONLY public.prenotazione ALTER COLUMN id SET DEFAULT nextval('public.prenotare_id_seq'::regclass);
 
 
 --
--- Name: prenotazione id_utente; Type: DEFAULT; Schema: public; Owner: matteofo
+-- Name: prenotazione id_utente; Type: DEFAULT; Schema: public; Owner: zam
 --
 
 ALTER TABLE ONLY public.prenotazione ALTER COLUMN id_utente SET DEFAULT nextval('public.prenotare_id_utente_seq'::regclass);
 
 
 --
--- Name: prenotazione id_asset; Type: DEFAULT; Schema: public; Owner: matteofo
+-- Name: prenotazione id_asset; Type: DEFAULT; Schema: public; Owner: zam
 --
 
 ALTER TABLE ONLY public.prenotazione ALTER COLUMN id_asset SET DEFAULT nextval('public.prenotare_id_asset_seq'::regclass);
 
 
 --
--- Name: utente id; Type: DEFAULT; Schema: public; Owner: matteofo
+-- Name: utente id; Type: DEFAULT; Schema: public; Owner: zam
 --
 
 ALTER TABLE ONLY public.utente ALTER COLUMN id SET DEFAULT nextval('public.utente_id_seq'::regclass);
 
 
 --
--- Name: utente coordinatore; Type: DEFAULT; Schema: public; Owner: matteofo
+-- Name: utente coordinatore; Type: DEFAULT; Schema: public; Owner: zam
 --
 
 ALTER TABLE ONLY public.utente ALTER COLUMN coordinatore SET DEFAULT nextval('public.utente_coordinatore_seq'::regclass);
 
 
 --
--- Data for Name: asset; Type: TABLE DATA; Schema: public; Owner: matteofo
+-- Data for Name: asset; Type: TABLE DATA; Schema: public; Owner: zam
 --
 
 COPY public.asset (id, stato, tipo) FROM stdin;
@@ -329,7 +289,7 @@ COPY public.asset (id, stato, tipo) FROM stdin;
 
 
 --
--- Data for Name: prenotazione; Type: TABLE DATA; Schema: public; Owner: matteofo
+-- Data for Name: prenotazione; Type: TABLE DATA; Schema: public; Owner: zam
 --
 
 COPY public.prenotazione (id, inizio, fine, nmod, id_utente, id_asset) FROM stdin;
@@ -337,7 +297,7 @@ COPY public.prenotazione (id, inizio, fine, nmod, id_utente, id_asset) FROM stdi
 
 
 --
--- Data for Name: utente; Type: TABLE DATA; Schema: public; Owner: matteofo
+-- Data for Name: utente; Type: TABLE DATA; Schema: public; Owner: zam
 --
 
 COPY public.utente (id, nome, cognome, username, password, tipo, coordinatore) FROM stdin;
@@ -345,49 +305,49 @@ COPY public.utente (id, nome, cognome, username, password, tipo, coordinatore) F
 
 
 --
--- Name: asset_id_seq; Type: SEQUENCE SET; Schema: public; Owner: matteofo
+-- Name: asset_id_seq; Type: SEQUENCE SET; Schema: public; Owner: zam
 --
 
 SELECT pg_catalog.setval('public.asset_id_seq', 1, false);
 
 
 --
--- Name: prenotare_id_asset_seq; Type: SEQUENCE SET; Schema: public; Owner: matteofo
+-- Name: prenotare_id_asset_seq; Type: SEQUENCE SET; Schema: public; Owner: zam
 --
 
 SELECT pg_catalog.setval('public.prenotare_id_asset_seq', 1, false);
 
 
 --
--- Name: prenotare_id_seq; Type: SEQUENCE SET; Schema: public; Owner: matteofo
+-- Name: prenotare_id_seq; Type: SEQUENCE SET; Schema: public; Owner: zam
 --
 
 SELECT pg_catalog.setval('public.prenotare_id_seq', 1, false);
 
 
 --
--- Name: prenotare_id_utente_seq; Type: SEQUENCE SET; Schema: public; Owner: matteofo
+-- Name: prenotare_id_utente_seq; Type: SEQUENCE SET; Schema: public; Owner: zam
 --
 
 SELECT pg_catalog.setval('public.prenotare_id_utente_seq', 1, false);
 
 
 --
--- Name: utente_coordinatore_seq; Type: SEQUENCE SET; Schema: public; Owner: matteofo
+-- Name: utente_coordinatore_seq; Type: SEQUENCE SET; Schema: public; Owner: zam
 --
 
 SELECT pg_catalog.setval('public.utente_coordinatore_seq', 1, false);
 
 
 --
--- Name: utente_id_seq; Type: SEQUENCE SET; Schema: public; Owner: matteofo
+-- Name: utente_id_seq; Type: SEQUENCE SET; Schema: public; Owner: zam
 --
 
 SELECT pg_catalog.setval('public.utente_id_seq', 1, false);
 
 
 --
--- Name: asset asset_pkey; Type: CONSTRAINT; Schema: public; Owner: matteofo
+-- Name: asset asset_pkey; Type: CONSTRAINT; Schema: public; Owner: zam
 --
 
 ALTER TABLE ONLY public.asset
@@ -395,7 +355,7 @@ ALTER TABLE ONLY public.asset
 
 
 --
--- Name: prenotazione prenotare_pkey; Type: CONSTRAINT; Schema: public; Owner: matteofo
+-- Name: prenotazione prenotare_pkey; Type: CONSTRAINT; Schema: public; Owner: zam
 --
 
 ALTER TABLE ONLY public.prenotazione
@@ -403,7 +363,7 @@ ALTER TABLE ONLY public.prenotazione
 
 
 --
--- Name: utente utente_pkey; Type: CONSTRAINT; Schema: public; Owner: matteofo
+-- Name: utente utente_pkey; Type: CONSTRAINT; Schema: public; Owner: zam
 --
 
 ALTER TABLE ONLY public.utente
@@ -411,7 +371,7 @@ ALTER TABLE ONLY public.utente
 
 
 --
--- Name: prenotazione prenotare_id_asset_fkey; Type: FK CONSTRAINT; Schema: public; Owner: matteofo
+-- Name: prenotazione prenotare_id_asset_fkey; Type: FK CONSTRAINT; Schema: public; Owner: zam
 --
 
 ALTER TABLE ONLY public.prenotazione
@@ -419,7 +379,7 @@ ALTER TABLE ONLY public.prenotazione
 
 
 --
--- Name: prenotazione prenotare_id_utente_fkey; Type: FK CONSTRAINT; Schema: public; Owner: matteofo
+-- Name: prenotazione prenotare_id_utente_fkey; Type: FK CONSTRAINT; Schema: public; Owner: zam
 --
 
 ALTER TABLE ONLY public.prenotazione
@@ -427,7 +387,7 @@ ALTER TABLE ONLY public.prenotazione
 
 
 --
--- Name: utente utente_coordinatore_fkey; Type: FK CONSTRAINT; Schema: public; Owner: matteofo
+-- Name: utente utente_coordinatore_fkey; Type: FK CONSTRAINT; Schema: public; Owner: zam
 --
 
 ALTER TABLE ONLY public.utente
@@ -435,7 +395,7 @@ ALTER TABLE ONLY public.utente
 
 
 --
--- Name: SCHEMA public; Type: ACL; Schema: -; Owner: matteofo
+-- Name: SCHEMA public; Type: ACL; Schema: -; Owner: zam
 --
 
 GRANT USAGE ON SCHEMA public TO zam;
