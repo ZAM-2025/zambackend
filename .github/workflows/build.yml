@@ -6,11 +6,10 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Verify the PR
-run-name: ${{ github.actor }} is verify the PR.
+name: Compilazione di ZAMBackend
 
 on:
-  pull_request:
+  push:
     branches:
       - master
 
