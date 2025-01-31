@@ -1,8 +1,13 @@
 package com.zam.backend;
 
+import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
+
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 
 @Entity
 @Table(name = "utente")
@@ -21,7 +26,7 @@ public class ZamUser {
     @Column(name = "tipo", columnDefinition = "tipoutente")
     private ZamUserType tipo;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @ManyToOne(fetch = FetchType.EAGER, optional = true)
     @ColumnDefault("nextval('utente_coordinatore_seq')")
     @JoinColumn(name = "coordinatore", nullable = true)
     private ZamUser coordinatore;
@@ -55,4 +60,6 @@ public class ZamUser {
     public String getNome() { return this.nome; }
 
     public ZamUser getCoordinatore() { return coordinatore; }
+
+    public ZamUserType getTipo() { return this.tipo; }
 }
