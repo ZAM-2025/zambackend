@@ -13,4 +13,6 @@ public interface ZamUserRepository extends CrudRepository<ZamUser, Integer> {
     default List<ZamUser> findByTipo(ZamUserType tipo) {
         return findByTipo(tipo.name());
     }
+
+    ZamUser findByUsername(String username);
 }
