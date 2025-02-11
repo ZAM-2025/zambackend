@@ -17,6 +17,68 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
+-- Name: zam-prova; Type: DATABASE; Schema: -; Owner: matteofo
+--
+
+CREATE DATABASE "zam-prova" WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE = 'it_IT.UTF-8';
+
+
+ALTER DATABASE "zam-prova" OWNER TO matteofo;
+
+\connect -reuse-previous=on "dbname='zam-prova'"
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- Name: _statoasset; Type: TYPE; Schema: public; Owner: matteofo
+--
+
+CREATE TYPE public._statoasset AS ENUM (
+    'occ',
+    'lib',
+    'np'
+);
+
+
+ALTER TYPE public._statoasset OWNER TO matteofo;
+
+--
+-- Name: _tipoasset; Type: TYPE; Schema: public; Owner: matteofo
+--
+
+CREATE TYPE public._tipoasset AS ENUM (
+    'a',
+    'a2',
+    'b',
+    'c'
+);
+
+
+ALTER TYPE public._tipoasset OWNER TO matteofo;
+
+--
+-- Name: _tipoutente; Type: TYPE; Schema: public; Owner: matteofo
+--
+
+CREATE TYPE public._tipoutente AS ENUM (
+    'dip',
+    'cor',
+    'ges'
+);
+
+
+ALTER TYPE public._tipoutente OWNER TO matteofo;
+
+--
 -- Name: statoasset; Type: TYPE; Schema: public; Owner: zam
 --
 
@@ -186,7 +248,7 @@ CREATE TABLE public.utente (
     nome character varying(30),
     cognome character varying(30),
     username character varying(20),
-    password character varying(20),
+    password character varying(64),
     tipo public.tipoutente,
     coordinatore integer
 );
@@ -301,6 +363,9 @@ COPY public.prenotazione (id, inizio, fine, nmod, id_utente, id_asset) FROM stdi
 --
 
 COPY public.utente (id, nome, cognome, username, password, tipo, coordinatore) FROM stdin;
+0	Matteo	Forlani	matteofo	0	COORDINATORE	\N
+1	Giacomo	Agatan	gagatan	0	DIPENDENTE	0
+2	Provo	McProva	prova	Ylil4Ot3KRHU+SvltdsOFFEe2+AdHQ3dHVosuduaVro=	DIPENDENTE	0
 \.
 
 
@@ -395,7 +460,7 @@ ALTER TABLE ONLY public.utente
 
 
 --
--- Name: SCHEMA public; Type: ACL; Schema: -; Owner: zam
+-- Name: SCHEMA public; Type: ACL; Schema: -; Owner: matteofo
 --
 
 GRANT USAGE ON SCHEMA public TO zam;
