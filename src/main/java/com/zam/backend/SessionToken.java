@@ -20,7 +20,7 @@ public class SessionToken {
     public boolean isExpired() {
         LocalDateTime now = LocalDateTime.now();
 
-        return now.isAfter(createdAt.plusSeconds(EXPIRES_IN));
+        return now.isAfter(createdAt.plusDays(EXPIRES_IN));
     }
 
     @Override
