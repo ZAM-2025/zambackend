@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -37,18 +38,32 @@ public class WebUserController {
     public WebUserValidation auth(@RequestBody ZamAuthUser zamAuthUser) {
         WipeTokens();
 
-        if(hasTokenForUser(zamAuthUser.username) == ZamTokenStatus.VALID) {
-            SessionToken token = getTokenForUser(zamAuthUser.username);
+        String user = zamAuthUser.username;
+        String password = zamAuthUser.password;
+        ZamUser dbUser = this.repository.findByUsername(user);
 
-            if(token != null && !token.isExpired()) {
-                return new WebUserValidation(true, token.toString(), token.getCreationTimestamp());
+        if(hasTokenForUser(zamAuthUser.username) == ZamTokenStatus.VALID) {
+            try {
+                String stringHash = calculateHash(password);
+
+                if(stringHash.equals(dbUser.getPassword())) {
+                    SessionToken token = getTokenForUser(zamAuthUser.username);
+
+                    if(token != null && !token.isExpired()) {
+                        ZamLogger.log("Auth request for " + user + " successful");
+                        return new WebUserValidation(true, token.toString(), token.getCreationTimestamp());
+                    }
+
+                    ZamLogger.log("Auth request for " + user + " successful");
+                } else {
+                    ZamLogger.warning("Auth request for " + user + " failed: wrong password");
+                    return new WebUserValidation(false, "Wrong password", LocalDateTime.now());
+                }
+            } catch(Exception ex) {
+                return new WebUserValidation(false, "Server failure: " + ex.getMessage(), LocalDateTime.now());
             }
         }
 
-        String user = zamAuthUser.username;
-        String password = zamAuthUser.password;
-
-        ZamUser dbUser = this.repository.findByUsername(user);
 
         if(dbUser == null) {
             ZamLogger.warning("Auth request for " + user + " failed: no such user");
@@ -56,10 +71,7 @@ public class WebUserController {
         }
 
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-
-            byte[] passHash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
-            String stringHash = Base64.getEncoder().encodeToString(passHash);
+            String stringHash = calculateHash(password);
 
             if(stringHash.equals(dbUser.getPassword())) {
                 SessionToken token = new SessionToken(dbUser);
@@ -74,6 +86,13 @@ public class WebUserController {
         } catch(Exception ex) {
             return new WebUserValidation(false, "Server failure: " + ex.getMessage(), LocalDateTime.now());
         }
+    }
+
+    private static String calculateHash(String password) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
+        byte[] passHash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
+        return Base64.getEncoder().encodeToString(passHash);
     }
 
     public static SessionToken getTokenForUser(String username) {
