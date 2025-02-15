@@ -33,6 +33,9 @@ public class WebUserController {
         }
     }
 
+    // TODO: Aggiungere creazione utente per coordinatori
+    // TODO: Aggiungere validazione password
+
     @PostMapping(value = "/auth", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public WebUserValidation auth(@RequestBody ZamAuthUser zamAuthUser) {
@@ -43,33 +46,18 @@ public class WebUserController {
         ZamUser dbUser = this.repository.findByUsername(user);
 
         if(hasTokenForUser(zamAuthUser.username) == ZamTokenStatus.VALID) {
-            try {
-                String stringHash = calculateHash(password);
-
-                if(stringHash.equals(dbUser.getPassword())) {
-                    SessionToken token = getTokenForUser(zamAuthUser.username);
-
-                    if(token != null && !token.isExpired()) {
-                        ZamLogger.log("Auth request for " + user + " successful");
-                        return new WebUserValidation(true, token.toString(), token.getCreationTimestamp());
-                    }
-
-                    ZamLogger.log("Auth request for " + user + " successful");
-                } else {
-                    ZamLogger.warning("Auth request for " + user + " failed: wrong password");
-                    return new WebUserValidation(false, "Wrong password", LocalDateTime.now());
-                }
-            } catch(Exception ex) {
-                return new WebUserValidation(false, "Server failure: " + ex.getMessage(), LocalDateTime.now());
-            }
+            return matchHash(password, dbUser);
         }
-
 
         if(dbUser == null) {
             ZamLogger.warning("Auth request for " + user + " failed: no such user");
             return new WebUserValidation(false, "No such user", LocalDateTime.now());
         }
 
+        return matchHash(password, dbUser);
+    }
+
+    private static WebUserValidation matchHash(String password, ZamUser dbUser) {
         try {
             String stringHash = calculateHash(password);
 
@@ -77,10 +65,10 @@ public class WebUserController {
                 SessionToken token = new SessionToken(dbUser);
                 sessionTokens.add(token);
 
-                ZamLogger.log("Auth request for " + user + " successful");
+                ZamLogger.log("Auth request for " + dbUser.getUsername() + " successful");
                 return new WebUserValidation(true, token.toString(), LocalDateTime.now());
             } else {
-                ZamLogger.warning("Auth request for " + user + " failed: wrong password");
+                ZamLogger.warning("Auth request for " + dbUser.getUsername() + " failed: wrong password");
                 return new WebUserValidation(false, "Wrong password", LocalDateTime.now());
             }
         } catch(Exception ex) {
