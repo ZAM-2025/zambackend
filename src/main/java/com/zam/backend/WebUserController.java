@@ -45,8 +45,9 @@ public class WebUserController {
         String password = zamAuthUser.password;
         ZamUser dbUser = this.repository.findByUsername(user);
 
-        if(hasTokenForUser(zamAuthUser.username) == ZamTokenStatus.VALID) {
-            return matchHash(password, dbUser);
+        if(getUserTokenStatus(zamAuthUser.username) == ZamTokenStatus.VALID) {
+            SessionToken token = getTokenForUser(zamAuthUser.username);
+            return matchTokenHash(password, dbUser, token.toString());
         }
 
         if(dbUser == null) {
@@ -55,6 +56,22 @@ public class WebUserController {
         }
 
         return matchHash(password, dbUser);
+    }
+
+    private static WebUserValidation matchTokenHash(String password, ZamUser dbUser, String token) {
+        try {
+            String stringHash = calculateHash(password);
+
+            if(stringHash.equals(dbUser.getPassword())) {
+                ZamLogger.log("Auth request for " + dbUser.getUsername() + " successful");
+                return new WebUserValidation(true, token, LocalDateTime.now());
+            } else {
+                ZamLogger.warning("Auth request for " + dbUser.getUsername() + " failed: wrong password");
+                return new WebUserValidation(false, "Wrong password", LocalDateTime.now());
+            }
+        } catch(Exception ex) {
+            return new WebUserValidation(false, "Server failure: " + ex.getMessage(), LocalDateTime.now());
+        }
     }
 
     private static WebUserValidation matchHash(String password, ZamUser dbUser) {
@@ -93,7 +110,7 @@ public class WebUserController {
         return null;
     }
 
-    public static ZamTokenStatus hasTokenForUser(String username) {
+    public static ZamTokenStatus getUserTokenStatus(String username) {
         for(SessionToken sessionToken : sessionTokens) {
             if(sessionToken.getUsername().equals(username)) {
                 if(sessionToken.isExpired()) {
