@@ -363,9 +363,9 @@ COPY public.prenotazione (id, inizio, fine, nmod, id_utente, id_asset) FROM stdi
 --
 
 COPY public.utente (id, nome, cognome, username, password, tipo, coordinatore) FROM stdin;
-0	Matteo	Forlani	matteofo	0	COORDINATORE	\N
 1	Giacomo	Agatan	gagatan	0	DIPENDENTE	0
 2	Provo	McProva	prova	Ylil4Ot3KRHU+SvltdsOFFEe2+AdHQ3dHVosuduaVro=	DIPENDENTE	0
+0	Matteo	Forlani	matteofo	GRJ2bWug5Q6LG6z7USB+g7lbesDNjOFTB830ll5+P2w=	COORDINATORE	\N
 \.
 
 
