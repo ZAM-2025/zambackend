@@ -20,7 +20,7 @@ public class WebUserController {
     @Autowired
     private final ZamUserRepository userRepository;
     private final ZamTokenRepository tokenRepository;
-    
+
     @GetMapping("/debugGetUser")
     public Iterable<ZamUser> debugGetUser() {
         return this.userRepository.findAll();
@@ -28,6 +28,34 @@ public class WebUserController {
 
     // TODO: Aggiungere creazione utente per coordinatori
     // TODO: Aggiungere validazione password
+
+    @PostMapping(value = "/logout", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public WebUserValidation logout(@RequestBody ZamAuthToken token) {
+        ZamToken t = this.tokenRepository.findZamTokenByVal(token.token);
+        if(t == null) {
+            ZamLogger.warning("Failed to logout");
+            return new WebUserValidation(false, "Failed to logout", LocalDateTime.now());
+        }
+
+        ZamLogger.log("Logged out a user");
+        this.tokenRepository.delete(t);
+        return new WebUserValidation(true, "User logged out", LocalDateTime.now());
+    }
+
+    @PostMapping(value = "/getUserInfo", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public WebUserInfo getUserInfo(@RequestBody ZamAuthToken token) {
+        ZamUser user = this.tokenRepository.findUser(token.token);
+
+        if(user == null) {
+            ZamLogger.warning("User not found for token " + token.token);
+            return new WebUserInfo(false, null, null, null, null);
+        }
+
+        ZamLogger.log("User " + user.getUsername() + " found for token " + token.token);
+        return new WebUserInfo(true, user.getUsername(), user.getNome(), user.getCognome(), user.getTipo());
+    }
 
     @PostMapping(value = "/auth", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody

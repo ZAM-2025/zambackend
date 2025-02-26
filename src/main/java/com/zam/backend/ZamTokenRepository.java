@@ -16,5 +16,9 @@ public interface ZamTokenRepository extends CrudRepository<ZamToken, Integer> {
     @Query(value = "DELETE FROM zamtoken WHERE created < CURRENT_TIMESTAMP - INTERVAL '30 days'", nativeQuery = true)
     void clearTokens();
 
+    @Transactional
+    @Query(value = "SELECT DISTINCT utente.* FROM utente INNER JOIN zamtoken z on utente.id = z.idutente WHERE z.val = :token", nativeQuery = true)
+    ZamUser findUser(@Param("token") String token);
+
     ZamToken findZamTokenByVal(String val);
 }
