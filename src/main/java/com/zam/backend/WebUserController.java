@@ -21,15 +21,10 @@ public class WebUserController {
     private final ZamUserRepository userRepository;
     private final ZamTokenRepository tokenRepository;
 
-    @GetMapping("/debugGetUser")
-    public Iterable<ZamUser> debugGetUser() {
-        return this.userRepository.findAll();
-    }
-
     // TODO: Aggiungere creazione utente per coordinatori
     // TODO: Aggiungere validazione password
 
-    @PostMapping(value = "/logout", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/api/user/logout", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public WebUserValidation logout(@RequestBody ZamAuthToken token) {
         ZamToken t = this.tokenRepository.findZamTokenByVal(token.token);
@@ -43,7 +38,7 @@ public class WebUserController {
         return new WebUserValidation(true, "User logged out", LocalDateTime.now());
     }
 
-    @PostMapping(value = "/getUserInfo", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/api/user/info", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public WebUserInfo getUserInfo(@RequestBody ZamAuthToken token) {
         ZamUser user = this.tokenRepository.findUser(token.token);
@@ -57,7 +52,7 @@ public class WebUserController {
         return new WebUserInfo(true, user.getUsername(), user.getNome(), user.getCognome(), user.getTipo());
     }
 
-    @PostMapping(value = "/auth", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/api/user/auth", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public WebUserValidation auth(@RequestBody ZamAuthUser zamAuthUser) {
         tokenRepository.clearTokens();
@@ -123,7 +118,7 @@ public class WebUserController {
         return Base64.getEncoder().encodeToString(passHash);
     }
 
-    @PostMapping(value = "/authToken", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/api/user/token", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public WebUserValidation authToken(@RequestBody ZamAuthToken zamAuthToken) {
         tokenRepository.clearTokens();
@@ -135,21 +130,6 @@ public class WebUserController {
             ZamLogger.warning("Token auth request failed: no such token");
             return new WebUserValidation(false, "No such token", LocalDateTime.now());
         }
-    }
-
-    @GetMapping("/getCoordinatori")
-    public Iterable<ZamUser> getCoordinatori() {
-        return this.userRepository.findByTipo(ZamUserType.COORDINATORE);
-    }
-
-    @GetMapping("/getDipendenti")
-    public Iterable<ZamUser> getDipendenti() {
-        return this.userRepository.findByTipo(ZamUserType.DIPENDENTE);
-    }
-
-    @GetMapping("/getGestori")
-    public Iterable<ZamUser> getGestori() {
-        return this.userRepository.findByTipo(ZamUserType.GESTORE);
     }
 
     public WebUserController(ZamUserRepository userRepository, ZamTokenRepository tokenRepository) {

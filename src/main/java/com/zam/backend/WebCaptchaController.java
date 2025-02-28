@@ -30,14 +30,14 @@ public class WebCaptchaController {
         captchas.removeIf(captcha -> captcha.getTimestamp().isBefore(now.minusMinutes(CAPTCHA_EXPIRY)));
     }
 
-    @GetMapping("/getCaptcha")
+    @GetMapping("/api/captcha/get")
     public WebCaptchaRequest getCaptcha() {
         this.WipeCaptchas();
 
         try {
             Captcha captcha = new Captcha();
             captchas.add(captcha);
-            return new WebCaptchaRequest(true, captcha.getId(), "/getCaptchaImage?id=" + captcha.getId(),
+            return new WebCaptchaRequest(true, captcha.getId(), "/api/captcha/image?id=" + captcha.getId(),
                     LocalDateTime.now());
         } catch(Exception e) {
             Logger.getGlobal().severe("getCaptcha failed with " + e.getMessage());
@@ -45,7 +45,7 @@ public class WebCaptchaController {
         }
     }
 
-    @GetMapping("/validateCaptcha")
+    @GetMapping("/api/captcha/validate")
     public WebCaptchaValidation validateCaptcha(@RequestParam String id, @RequestParam String match) {
         // Liberiamoci dei captcha scaduti prima di tutto
         this.WipeCaptchas();
@@ -66,7 +66,7 @@ public class WebCaptchaController {
         return new WebCaptchaValidation(false, id, LocalDateTime.now(), "No such Captcha");
     }
 
-    @GetMapping(value = "/getCaptchaImage", produces = MediaType.IMAGE_PNG_VALUE)
+    @GetMapping(value = "/api/captcha/image", produces = MediaType.IMAGE_PNG_VALUE)
     public @ResponseBody byte[] getCaptchaImage(@RequestParam String id) throws IOException {
         this.WipeCaptchas();
 
