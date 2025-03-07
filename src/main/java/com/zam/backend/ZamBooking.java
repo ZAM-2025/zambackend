@@ -1,5 +1,6 @@
 package com.zam.backend;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
 
@@ -7,7 +8,7 @@ import java.time.Instant;
 
 @Entity
 @Table(name = "prenotazione")
-public class ZamUserBooking {
+public class ZamBooking {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "prenotazione_id_gen")
     @SequenceGenerator(name = "prenotazione_id_gen", sequenceName = "prenotare_id_seq", allocationSize = 1)
@@ -26,16 +27,18 @@ public class ZamUserBooking {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @ColumnDefault("nextval('prenotare_id_utente_seq')")
     @JoinColumn(name = "id_utente", nullable = false)
+    @JsonIgnore
     private ZamUser idUtente;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @ColumnDefault("nextval('prenotare_id_asset_seq')")
     @JoinColumn(name = "id_asset", nullable = false)
+    @JsonIgnore
     private ZamAsset idAsset;
 
-    protected ZamUserBooking() {}
+    protected ZamBooking() {}
 
-    public ZamUserBooking(ZamUser idUtente, ZamAsset idAsset, Instant inizio, Instant fine) {
+    public ZamBooking(ZamUser idUtente, ZamAsset idAsset, Instant inizio, Instant fine) {
         this.idUtente = idUtente;
         this.idAsset = idAsset;
 
