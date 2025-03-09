@@ -69,8 +69,6 @@ public class ZamBooking {
         return nmod;
     }
 
-    public void setNmod(Integer nmod) { this.nmod = nmod; }
-
     public ZamUser getIdUtente() {
         return idUtente;
     }
@@ -78,6 +76,16 @@ public class ZamBooking {
     public ZamAsset getIdAsset() {
         return idAsset;
     }
+
+    public void setNmod(Integer nmod) { this.nmod = nmod; }
+
+    public void setIdUtente(ZamUser idUtente) { this.idUtente = idUtente; }
+
+    public void setIdAsset(ZamAsset idAsset) { this.idAsset = idAsset; }
+
+    public void setInizio(LocalDateTime inizio) { this.inizio = inizio; }
+
+    public void setFine(LocalDateTime fine) { this.fine = fine; }
 
     public boolean isBooked() {
         LocalDateTime now = LocalDateTime.now();

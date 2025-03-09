@@ -13,16 +13,16 @@ public class ZamLogger {
     private static final String ANSI_CYAN = "\u001B[36m";
     private static final String ANSI_WHITE = "\u001B[37m";
 
-    public static void log(String message) {
+    public static void log(Object message) {
         System.out.println(ANSI_GREEN + "[ZAM:log@" + LocalDateTime.now() + "]" + ANSI_RESET + " " + message);
     }
 
-    public static void warning(String message) {
+    public static void warning(Object message) {
         System.out.println(ANSI_YELLOW + "[ZAM:warning@" + LocalDateTime.now() + "]" + ANSI_RESET + " " + message);
 
     }
 
-    public static void error(String message) {
+    public static void error(Object message) {
         System.out.println(ANSI_RED + "[ZAM:error@" + LocalDateTime.now() + "]" + ANSI_RESET + " " + message);
 
     }
