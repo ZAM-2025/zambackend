@@ -1,3 +1,3 @@
 package com.zam.backend;
 
-public record WebBookingAssetResponse(ZamBooking body, Integer userId) { }
+public record WebBookingAssetResponse(ZamBooking body, Integer userId, boolean isBooked) { }

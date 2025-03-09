@@ -20,7 +20,7 @@ public class WebBookingController {
 
         List<WebBookingAssetResponse> res = new ArrayList<>();
         for (ZamBooking booking : bookings) {
-            res.add(new WebBookingAssetResponse(booking, booking.getIdUtente().getId()));
+            res.add(new WebBookingAssetResponse(booking, booking.getIdUtente().getId(), booking.isBooked()));
         }
 
         return res;

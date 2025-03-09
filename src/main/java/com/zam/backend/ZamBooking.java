@@ -1,10 +1,13 @@
 package com.zam.backend;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "prenotazione")
@@ -16,10 +19,12 @@ public class ZamBooking {
     private Integer id;
 
     @Column(name = "inizio")
-    private Instant inizio;
+    @JsonFormat(timezone = "Europe/Rome")
+    private LocalDateTime inizio;
 
     @Column(name = "fine")
-    private Instant fine;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone = "Europe/Rome")
+    private LocalDateTime fine;
 
     @Column(name = "nmod")
     private Integer nmod;
@@ -38,7 +43,7 @@ public class ZamBooking {
 
     protected ZamBooking() {}
 
-    public ZamBooking(ZamUser idUtente, ZamAsset idAsset, Instant inizio, Instant fine) {
+    public ZamBooking(ZamUser idUtente, ZamAsset idAsset, LocalDateTime inizio, LocalDateTime fine) {
         this.idUtente = idUtente;
         this.idAsset = idAsset;
 
@@ -52,11 +57,11 @@ public class ZamBooking {
         return id;
     }
 
-    public Instant getInizio() {
+    public LocalDateTime getInizio() {
         return inizio;
     }
 
-    public Instant getFine() {
+    public LocalDateTime getFine() {
         return fine;
     }
 
@@ -72,5 +77,10 @@ public class ZamBooking {
 
     public ZamAsset getIdAsset() {
         return idAsset;
+    }
+
+    public boolean isBooked() {
+        LocalDateTime now = LocalDateTime.now();
+        return now.isAfter(inizio) && now.isBefore(fine);
     }
 }
