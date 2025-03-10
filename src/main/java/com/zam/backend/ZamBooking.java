@@ -23,7 +23,7 @@ public class ZamBooking {
     private LocalDateTime inizio;
 
     @Column(name = "fine")
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone = "Europe/Rome")
+    @JsonFormat(timezone = "Europe/Rome")
     private LocalDateTime fine;
 
     @Column(name = "nmod")

@@ -3,6 +3,8 @@ package com.zam.backend;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,14 +36,17 @@ public class WebBookingController {
     public WebBookingResponse book(@RequestBody WebBookingRequest request) {
         tokenRepository.clearTokens();
 
+        LocalDateTime start = request.start().plusHours(1);
+        LocalDateTime end = request.end().plusHours(1);
+
         ZamToken token = tokenRepository.findZamTokenByVal(request.token());
         ZamUser user = this.tokenRepository.findUser(request.token());
         Optional<ZamAsset> asset = assetRepository.findById(request.asset());
 
         Iterable<ZamBooking> bookings = bookingRepository.findZamBookingByIdAsset(asset.get());
         for (ZamBooking booking : bookings) {
-            boolean startCondition = booking.getInizio().isAfter(request.start()) || booking.getInizio().isEqual(request.start());
-            boolean endCondition = booking.getFine().isBefore(request.end()) || booking.getFine().isEqual(request.end());
+            boolean startCondition = booking.getInizio().isAfter(start);
+            boolean endCondition = booking.getFine().isBefore(end);
 
             ZamLogger.log(booking.getInizio());
             ZamLogger.log(request.start());
@@ -60,7 +65,7 @@ public class WebBookingController {
             return new WebBookingResponse(false);
         }
 
-        ZamBooking booking = new ZamBooking(user, asset.get(), request.start(), request.end());
+        ZamBooking booking = new ZamBooking(user, asset.get(), start, end);
         bookingRepository.save(booking);
 
         return new WebBookingResponse(true);
