@@ -45,8 +45,8 @@ public class WebBookingController {
 
         Iterable<ZamBooking> bookings = bookingRepository.findZamBookingByIdAsset(asset.get());
         for (ZamBooking booking : bookings) {
-            boolean startCondition = booking.getInizio().isAfter(start);
-            boolean endCondition = booking.getFine().isBefore(end);
+            boolean startCondition = booking.getInizio().isAfter(start) || booking.getInizio().isEqual(start);
+            boolean endCondition = booking.getFine().isBefore(end) || booking.getInizio().isEqual(start);
 
             ZamLogger.log(booking.getInizio());
             ZamLogger.log(request.start());
