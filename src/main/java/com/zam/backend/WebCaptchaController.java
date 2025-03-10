@@ -19,8 +19,17 @@ import java.util.logging.Logger;
 @CrossOrigin(origins = "*")
 public class WebCaptchaController {
     private static ArrayList<Captcha> captchas = new ArrayList<>();
+    private static ArrayList<Captcha> validatedCaptchas = new ArrayList<>();
     // Intervallo di scadenza dei Captcha (ogni CAPTCHA_EXPIRY minuti)
     private static final int CAPTCHA_EXPIRY = 1;
+
+    public static ArrayList<Captcha> getValidatedCaptchas() {
+        return validatedCaptchas;
+    }
+
+    public static void removeValidatedCaptcha(String captchaID) {
+        validatedCaptchas.removeIf(captcha -> captchaID.equals(captcha.getId()));
+    }
 
     // Rimuove i Captcha scaduti.
     // Ideale farlo ogni volta che viene chiamato un metodo che interagisce con i Captcha
@@ -53,17 +62,18 @@ public class WebCaptchaController {
         for(Captcha captcha : captchas) {
             if(captcha.getId().equals(id)) {
                 if(captcha.getMatch().equals(match)) {
+                    validatedCaptchas.add(captcha);
                     captchas.removeIf(c -> c.getId().equals(id));
                     return new WebCaptchaValidation(true, id, LocalDateTime.now(), "OK");
                 } else {
                     captchas.removeIf(c -> c.getId().equals(id));
-                    return new WebCaptchaValidation(false, id, LocalDateTime.now(), "Captcha does not match");
+                    return new WebCaptchaValidation(false, id, LocalDateTime.now(), "Captcha errato!");
                 }
             }
         }
 
         captchas.removeIf(c -> c.getId().equals(id));
-        return new WebCaptchaValidation(false, id, LocalDateTime.now(), "No such Captcha");
+        return new WebCaptchaValidation(false, id, LocalDateTime.now(), "Captcha scaduto!");
     }
 
     @GetMapping(value = "/api/captcha/image", produces = MediaType.IMAGE_PNG_VALUE)

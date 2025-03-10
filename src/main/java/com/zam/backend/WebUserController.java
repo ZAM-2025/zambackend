@@ -1,5 +1,6 @@
 package com.zam.backend;
 
+import com.zam.captcha.Captcha;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -9,10 +10,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -56,6 +54,21 @@ public class WebUserController {
     @ResponseBody
     public WebUserValidation auth(@RequestBody ZamAuthUser zamAuthUser) {
         tokenRepository.clearTokens();
+
+        boolean hasCaptcha = false;
+        for(Captcha c : WebCaptchaController.getValidatedCaptchas()) {
+            if(Objects.equals(c.getId(), zamAuthUser.captchaID)) {
+                ZamLogger.log("Captcha ID " + c.getId());
+
+                WebCaptchaController.removeValidatedCaptcha(c.getId());
+                hasCaptcha = true;
+                break;
+            }
+        }
+
+        if(!hasCaptcha) {
+            return new WebUserValidation(false, "Captcha not sent", LocalDateTime.now());
+        }
 
         String user = zamAuthUser.username;
         String password = zamAuthUser.password;
