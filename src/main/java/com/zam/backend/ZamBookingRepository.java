@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface ZamBookingRepository extends CrudRepository<ZamBooking, Integer> {
     List<ZamBooking> findZamBookingByIdAsset(ZamAsset idAsset);
+
+    void removeZamBookingByIdUtente(ZamUser idUtente);
 }

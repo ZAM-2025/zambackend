@@ -31,6 +31,43 @@ public class WebBookingController {
         return res;
     }
 
+    @PostMapping(value = "/api/booking/booked", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Iterable<WebBookingAssoc> getBooked(@RequestBody WebBookingRequest request) {
+        tokenRepository.clearTokens();
+
+        ZamUser user = this.tokenRepository.findUser(request.token());
+
+        List<WebBookingAssoc> out = new ArrayList<>();
+
+        Iterable<ZamBooking> bookings = bookingRepository.findAll();
+        for(ZamBooking booking : bookings) {
+            if(booking.getIdUtente().getId() == user.getId()) {
+                ZamAsset asset = booking.getIdAsset();
+                out.add(new WebBookingAssoc(booking, asset.getNome(), asset.getPiano()));
+            }
+        }
+
+        return out;
+    }
+
+    @PostMapping(value = "/api/booking/delete", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public WebBookingResponse deleteBooking(@RequestBody WebBookingDeleteRequest request) {
+        tokenRepository.clearTokens();
+
+        ZamUser user = this.tokenRepository.findUser(request.token());
+
+        for(ZamBooking booking : bookingRepository.findAll()) {
+            if(request.bookingID().equals(booking.getId()) && booking.getIdUtente().getId() == user.getId()) {
+                bookingRepository.delete(booking);
+                return new WebBookingResponse(true);
+            }
+        }
+
+        return new WebBookingResponse(false);
+    }
+
     @PostMapping(value = "/api/booking/book", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public WebBookingResponse book(@RequestBody WebBookingRequest request) {
