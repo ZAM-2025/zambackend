@@ -61,11 +61,11 @@ public class WebBookingController {
         for(ZamBooking booking : bookingRepository.findAll()) {
             if(request.bookingID().equals(booking.getId()) && booking.getIdUtente().getId() == user.getId()) {
                 bookingRepository.delete(booking);
-                return new WebBookingResponse(true);
+                return new WebBookingResponse(true, "OK");
             }
         }
 
-        return new WebBookingResponse(false);
+        return new WebBookingResponse(false, "Prenotazione non trovata!");
     }
 
     @PostMapping(value = "/api/booking/book", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -81,6 +81,27 @@ public class WebBookingController {
         Optional<ZamAsset> asset = assetRepository.findById(request.asset());
 
         Iterable<ZamBooking> bookings = bookingRepository.findZamBookingByIdAsset(asset.get());
+
+        if(start.isAfter(end) || start.equals(end) || end.isBefore(start)) {
+            return new WebBookingResponse(false, "Date inserite non valide!");
+        }
+
+        switch(user.getTipo()) {
+            case ZamUserType.GESTORE:
+                {
+                    return new WebBookingResponse(false, "I gestori non possono effettuare prenotazioni!");
+                }
+            case ZamUserType.DIPENDENTE:
+                {
+                    if(asset.get().getTipo() == ZamAssetType.C) {
+                        return new WebBookingResponse(false, "Gli asset di tipo C non possono essere prenotati dai dipendenti!");
+                    }
+                }
+                break;
+            case ZamUserType.COORDINATORE:
+                break;
+        }
+
         for (ZamBooking booking : bookings) {
 
             boolean startCondition = start.isBefore(booking.getFine()) || booking.getInizio().isEqual(start);
@@ -95,18 +116,18 @@ public class WebBookingController {
             ZamLogger.log(endCondition);
 
             if (startCondition && endCondition) {
-                return new WebBookingResponse(false);
+                return new WebBookingResponse(false, "L'asset è già prenotato nella fascia oraria!");
             }
         }
 
         if(token == null || user == null || asset.isEmpty()) {
-            return new WebBookingResponse(false);
+            return new WebBookingResponse(false, "Dati mancanti!");
         }
 
         ZamBooking booking = new ZamBooking(user, asset.get(), start, end);
         bookingRepository.save(booking);
 
-        return new WebBookingResponse(true);
+        return new WebBookingResponse(true, "OK");
     }
 
     public WebBookingController(ZamBookingRepository bookingRepository, ZamAssetRepository assetRepository,

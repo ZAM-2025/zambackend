@@ -1,3 +1,3 @@
 package com.zam.backend;
 
-public record WebBookingResponse(boolean success) { }
+public record WebBookingResponse(boolean success, String message) { }
