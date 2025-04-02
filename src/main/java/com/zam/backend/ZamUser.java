@@ -8,6 +8,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
 
 import org.hibernate.dialect.PostgreSQLEnumJdbcType;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "utente")
@@ -24,6 +25,7 @@ public class ZamUser {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo", columnDefinition = "tipoutente")
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private ZamUserType tipo;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = true)
@@ -62,4 +64,16 @@ public class ZamUser {
     public ZamUser getCoordinatore() { return coordinatore; }
 
     public ZamUserType getTipo() { return this.tipo; }
+
+    public void setNome(String nome) { this.nome = nome; }
+
+    public void setCognome(String cognome) { this.cognome = cognome; }
+
+    public void setTipo(ZamUserType tipo) { this.tipo = tipo; }
+
+    public void setPassword(String password) { this.password = password; }
+
+    public ZamUser clone() {
+        return new ZamUser(this.username, this.password, this.nome, this.cognome, this.tipo, this.coordinatore);
+    }
 }

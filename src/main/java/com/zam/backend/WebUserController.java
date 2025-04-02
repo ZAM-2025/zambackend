@@ -36,6 +36,68 @@ public class WebUserController {
         return new WebUserValidation(true, "User logged out", LocalDateTime.now());
     }
 
+    @PostMapping(value = "/api/user/new", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public WebNewUserResponse newUser(@RequestBody WebNewUserRequest request) {
+        ZamUser user = this.tokenRepository.findUser(request.token());
+
+        if(user == null) {
+            return new WebNewUserResponse(false, "No such user");
+        }
+
+        if(user.getTipo() != ZamUserType.GESTORE) {
+            return new WebNewUserResponse(false, "Not allowed");
+        }
+
+        if(request.type() < 0 || request.type() > ZamUserType.values().length) {
+            return new WebNewUserResponse(false, "Bad request");
+        }
+
+        // TODO: Aggiungere criteri password!
+        // TODO: Aggiungere coordinatore!
+        ZamUser newUser = new ZamUser(request.username(), "",
+                request.nome(), request.cognome(),
+                ZamUserType.values()[request.type()], null);
+
+        try {
+            newUser.setPassword(calculateHash(request.password()));
+        } catch (NoSuchAlgorithmException e) {
+            return new WebNewUserResponse(false, "Server error");
+        }
+
+        userRepository.save(newUser);
+        return new WebNewUserResponse(true, "OK");
+    }
+
+    @PostMapping(value = "/api/user/type", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public WebUserTypeResponse getUserInfoByType(@RequestBody WebUserTypeRequest request) {
+        ZamUser user = this.tokenRepository.findUser(request.token());
+
+        if(user == null) {
+            return new WebUserTypeResponse(false, "User not found", Collections.emptyList());
+        }
+
+        if(user.getTipo() == ZamUserType.DIPENDENTE) {
+            return new WebUserTypeResponse(false, "Not allowed", Collections.emptyList());
+        }
+
+        if(request.type() < 0 || request.type() > ZamUserType.values().length) {
+            return new WebUserTypeResponse(false, "Bad request", Collections.emptyList());
+        }
+
+        ZamUserType type = ZamUserType.values()[request.type()];
+        Iterable<ZamUser> users = userRepository.findByTipo(type);
+
+        List<WebUserInfo> list = new ArrayList<>();
+
+        for(ZamUser u : users) {
+            list.add(new WebUserInfo(true, u.getUsername(), u.getNome(), u.getCognome(), u.getTipo()));
+        }
+
+        return new WebUserTypeResponse(true, "OK", list);
+    }
+
     @PostMapping(value = "/api/user/info", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public WebUserInfo getUserInfo(@RequestBody ZamAuthToken token) {

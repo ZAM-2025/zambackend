@@ -193,12 +193,23 @@ public class WebBookingController {
             break;
         }
 
-        Iterable<ZamBooking> bookings = bookingRepository.findZamBookingByIdAsset(booking.get().getIdAsset());
-        if (checkDoubleBooking(bookings, start, end)) {
-            return new WebBookingResponse(false, "L'asset è già prenotato nella fascia oraria!");
-        }
+        //Iterable<ZamBooking> bookings = bookingRepository.findZamBookingByIdAsset(booking.get().getIdAsset());
+        //if (checkDoubleBooking(bookings, start, end)) {
+        //    return new WebBookingResponse(false, "L'asset è già prenotato nella fascia oraria!");
+        //}
 
         // TODO: Gestire logica modifica (incremento nMod, cambio inizio e fine ecc.)
+        ZamBooking newBooking = new ZamBooking();
+
+        newBooking.setNmod(booking.get().getNmod() + 1);
+        newBooking.setIdAsset(booking.get().getIdAsset());
+        newBooking.setIdUtente(booking.get().getIdUtente());
+
+        newBooking.setInizio(start.toLocalDateTime());
+        newBooking.setFine(end.toLocalDateTime());
+
+        bookingRepository.delete(booking.get());
+        bookingRepository.save(newBooking);
 
         return new WebBookingResponse(true, "OK");
     }

@@ -15,4 +15,22 @@ public interface ZamUserRepository extends CrudRepository<ZamUser, Integer> {
     }
 
     ZamUser findByUsername(String username);
+
+    // Extra janky
+    @Query(value = "INSERT INTO utente (nome, cognome, username, password, tipo, coordinatore) VALUES (:nome, :cognome, :username, :password, :tipo, :coordinatore)", nativeQuery = true)
+    void write(@Param("nome") String nome, @Param("cognome") String cognome,
+               @Param("username") String username, @Param("password") String password,
+               @Param("tipo") String tipo, @Param("coordinatore") String coordinatore);
+
+
+    default void write(ZamUser user) {
+        String coordinatore = "NULL";
+        if(user.getCoordinatore() != null) {
+            coordinatore = Integer.toString(user.getCoordinatore().getId());
+        }
+
+        String tipo = user.getTipo().toString() + "::tipoutente";
+
+        write(user.getNome(), user.getCognome(), user.getUsername(), user.getPassword(), tipo, coordinatore);
+    }
 }
