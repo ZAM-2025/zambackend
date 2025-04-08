@@ -56,7 +56,7 @@ public class WebBookingController {
 
     @PostMapping(value = "/api/booking/delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public WebBookingResponse deleteBooking(@RequestBody WebBookingDeleteRequest request) {
+    public WebGenericResponse deleteBooking(@RequestBody WebBookingDeleteRequest request) {
         tokenRepository.clearTokens();
 
         ZamUser user = this.tokenRepository.findUser(request.token());
@@ -64,11 +64,11 @@ public class WebBookingController {
         for(ZamBooking booking : bookingRepository.findAll()) {
             if(request.bookingID().equals(booking.getId()) && booking.getIdUtente().getId() == user.getId()) {
                 bookingRepository.delete(booking);
-                return new WebBookingResponse(true, "OK");
+                return new WebGenericResponse(true, "OK");
             }
         }
 
-        return new WebBookingResponse(false, "Prenotazione non trovata!");
+        return new WebGenericResponse(false, "Prenotazione non trovata!");
     }
 
     // Ritorna true se è presente una prenotazione in conflitto, altrimenti ritorna false.
@@ -92,16 +92,16 @@ public class WebBookingController {
         return date.atZone(ZoneId.of("UTC")).withZoneSameInstant(ZoneId.of("Europe/Rome"));
     }
 
-    private WebBookingResponse validateDates(ZonedDateTime start, ZonedDateTime end) {
+    private WebGenericResponse validateDates(ZonedDateTime start, ZonedDateTime end) {
         if(start.isAfter(end) || start.equals(end) || end.isBefore(start)) {
             ZamLogger.warning("Date condition 1");
-            return new WebBookingResponse(false, "Date inserite non valide!");
+            return new WebGenericResponse(false, "Date inserite non valide!");
         }
 
         ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Europe/Rome"));
         if(start.isBefore(now) && !start.isEqual(now)) {
             ZamLogger.warning("Date condition 2 " + now);
-            return new WebBookingResponse(false, "Date inserite non valide!");
+            return new WebGenericResponse(false, "Date inserite non valide!");
         }
 
         return null;
@@ -109,13 +109,13 @@ public class WebBookingController {
 
     @PostMapping(value = "/api/booking/book", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public WebBookingResponse book(@RequestBody WebBookingRequest request) {
+    public WebGenericResponse book(@RequestBody WebBookingRequest request) {
         tokenRepository.clearTokens();
 
         ZonedDateTime start = convertDate(request.start());
         ZonedDateTime end = convertDate(request.end());
 
-        WebBookingResponse validation = validateDates(start, end);
+        WebGenericResponse validation = validateDates(start, end);
         if(validation != null) {
             return validation;
         }
@@ -125,7 +125,7 @@ public class WebBookingController {
         Optional<ZamAsset> asset = assetRepository.findById(request.asset());
 
         if(token == null || user == null || asset.isEmpty()) {
-            return new WebBookingResponse(false, "Dati mancanti!");
+            return new WebGenericResponse(false, "Dati mancanti!");
         }
 
         Iterable<ZamBooking> bookings = bookingRepository.findZamBookingByIdAsset(asset.get());
@@ -133,12 +133,12 @@ public class WebBookingController {
         switch(user.getTipo()) {
             case ZamUserType.GESTORE:
                 {
-                    return new WebBookingResponse(false, "I gestori non possono effettuare prenotazioni!");
+                    return new WebGenericResponse(false, "I gestori non possono effettuare prenotazioni!");
                 }
             case ZamUserType.DIPENDENTE:
                 {
                     if(asset.get().getTipo() == ZamAssetType.C) {
-                        return new WebBookingResponse(false, "Gli asset di tipo C non possono essere prenotati dai dipendenti!");
+                        return new WebGenericResponse(false, "Gli asset di tipo C non possono essere prenotati dai dipendenti!");
                     }
                 }
                 break;
@@ -147,24 +147,24 @@ public class WebBookingController {
         }
 
         if (checkDoubleBooking(bookings, start, end)) {
-            return new WebBookingResponse(false, "L'asset è già prenotato nella fascia oraria!");
+            return new WebGenericResponse(false, "L'asset è già prenotato nella fascia oraria!");
         }
 
         ZamBooking booking = new ZamBooking(user, asset.get(), start.toLocalDateTime(), end.toLocalDateTime());
         bookingRepository.save(booking);
 
-        return new WebBookingResponse(true, "OK");
+        return new WebGenericResponse(true, "OK");
     }
 
     @PostMapping(value = "/api/booking/edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public WebBookingResponse editBooking(@RequestBody WebBookingEditRequest request) {
+    public WebGenericResponse editBooking(@RequestBody WebBookingEditRequest request) {
         tokenRepository.clearTokens();
 
         ZonedDateTime start = convertDate(request.start());
         ZonedDateTime end = convertDate(request.end());
 
-        WebBookingResponse validation = validateDates(start, end);
+        WebGenericResponse validation = validateDates(start, end);
         if(validation != null) {
             return validation;
         }
@@ -174,7 +174,7 @@ public class WebBookingController {
         Optional<ZamBooking> booking = bookingRepository.findById(request.bookingID());
 
         if(token == null || user == null || booking.isEmpty()) {
-            return new WebBookingResponse(false, "Dati mancanti!");
+            return new WebGenericResponse(false, "Dati mancanti!");
         }
 
         switch(user.getTipo()) {
@@ -183,11 +183,11 @@ public class WebBookingController {
             case ZamUserType.DIPENDENTE, ZamUserType.COORDINATORE:
             {
                 if(user.getId() != booking.get().getIdUtente().getId()) {
-                    return new WebBookingResponse(false, "Utente errato.");
+                    return new WebGenericResponse(false, "Utente errato.");
                 }
 
                 if(booking.get().getNmod() >= 2) {
-                    return new WebBookingResponse(false, "Numero massimo di modifiche superato!");
+                    return new WebGenericResponse(false, "Numero massimo di modifiche superato!");
                 }
             }
             break;
@@ -195,7 +195,7 @@ public class WebBookingController {
 
         //Iterable<ZamBooking> bookings = bookingRepository.findZamBookingByIdAsset(booking.get().getIdAsset());
         //if (checkDoubleBooking(bookings, start, end)) {
-        //    return new WebBookingResponse(false, "L'asset è già prenotato nella fascia oraria!");
+        //    return new WebGenericResponse(false, "L'asset è già prenotato nella fascia oraria!");
         //}
 
         // TODO: Gestire logica modifica (incremento nMod, cambio inizio e fine ecc.)
@@ -211,7 +211,7 @@ public class WebBookingController {
         bookingRepository.delete(booking.get());
         bookingRepository.save(newBooking);
 
-        return new WebBookingResponse(true, "OK");
+        return new WebGenericResponse(true, "OK");
     }
 
     public WebBookingController(ZamBookingRepository bookingRepository, ZamAssetRepository assetRepository,

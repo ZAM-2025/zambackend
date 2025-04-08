@@ -1,3 +1,3 @@
 package com.zam.backend;
 
-public record WebUserTypeRequest(String token, Integer type) { }
+public record WebUserTypeRequest(String token, String type) { }

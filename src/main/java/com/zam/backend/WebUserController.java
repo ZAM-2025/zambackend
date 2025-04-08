@@ -36,37 +36,65 @@ public class WebUserController {
         return new WebUserValidation(true, "User logged out", LocalDateTime.now());
     }
 
-    @PostMapping(value = "/api/user/new", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/api/user/delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public WebNewUserResponse newUser(@RequestBody WebNewUserRequest request) {
+    public WebGenericResponse deleteUser(@RequestBody WebDeleteUserRequest request) {
         ZamUser user = this.tokenRepository.findUser(request.token());
 
         if(user == null) {
-            return new WebNewUserResponse(false, "No such user");
+            return new WebGenericResponse(false, "No such user");
         }
 
         if(user.getTipo() != ZamUserType.GESTORE) {
-            return new WebNewUserResponse(false, "Not allowed");
+            return new WebGenericResponse(false, "Not allowed");
+        }
+
+        Optional<ZamUser> deleteUser = this.userRepository.findById(request.userID());
+
+        if(deleteUser.isEmpty()) {
+            return new WebGenericResponse(false, "No such user");
+        }
+
+        this.userRepository.delete(deleteUser.get());
+        return new WebGenericResponse(true, "OK");
+    }
+
+    @PostMapping(value = "/api/user/new", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public WebGenericResponse newUser(@RequestBody WebNewUserRequest request) {
+        ZamUser user = this.tokenRepository.findUser(request.token());
+
+        if(user == null) {
+            return new WebGenericResponse(false, "No such user");
+        }
+
+        if(user.getTipo() != ZamUserType.GESTORE) {
+            return new WebGenericResponse(false, "Not allowed");
         }
 
         if(request.type() < 0 || request.type() > ZamUserType.values().length) {
-            return new WebNewUserResponse(false, "Bad request");
+            return new WebGenericResponse(false, "Bad request");
+        }
+
+        ZamUserType type = ZamUserType.values()[request.type()];
+        if(type == ZamUserType.GESTORE) {
+            return new WebGenericResponse(false, "Bad request");
         }
 
         // TODO: Aggiungere criteri password!
         // TODO: Aggiungere coordinatore!
         ZamUser newUser = new ZamUser(request.username(), "",
                 request.nome(), request.cognome(),
-                ZamUserType.values()[request.type()], null);
+                type, null);
 
         try {
             newUser.setPassword(calculateHash(request.password()));
         } catch (NoSuchAlgorithmException e) {
-            return new WebNewUserResponse(false, "Server error");
+            return new WebGenericResponse(false, "Server error");
         }
 
         userRepository.save(newUser);
-        return new WebNewUserResponse(true, "OK");
+        return new WebGenericResponse(true, "OK");
     }
 
     @PostMapping(value = "/api/user/type", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -82,17 +110,27 @@ public class WebUserController {
             return new WebUserTypeResponse(false, "Not allowed", Collections.emptyList());
         }
 
-        if(request.type() < 0 || request.type() > ZamUserType.values().length) {
+        ZamUserType[] types = ZamUserType.values();
+        boolean isValidType = false;
+
+        for(ZamUserType type : types) {
+            if(Objects.equals(request.type(), type.name())) {
+                isValidType = true;
+                break;
+            }
+        }
+
+        if(!isValidType) {
             return new WebUserTypeResponse(false, "Bad request", Collections.emptyList());
         }
 
-        ZamUserType type = ZamUserType.values()[request.type()];
+        ZamUserType type = ZamUserType.valueOf(request.type());
         Iterable<ZamUser> users = userRepository.findByTipo(type);
 
         List<WebUserInfo> list = new ArrayList<>();
 
         for(ZamUser u : users) {
-            list.add(new WebUserInfo(true, u.getUsername(), u.getNome(), u.getCognome(), u.getTipo()));
+            list.add(new WebUserInfo(u.getId(), true, u.getUsername(), u.getNome(), u.getCognome(), u.getTipo()));
         }
 
         return new WebUserTypeResponse(true, "OK", list);
@@ -105,11 +143,11 @@ public class WebUserController {
 
         if(user == null) {
             ZamLogger.warning("User not found for token " + token.token);
-            return new WebUserInfo(false, null, null, null, null);
+            return new WebUserInfo(-1, false, null, null, null, null);
         }
 
         ZamLogger.log("User " + user.getUsername() + " found for token " + token.token);
-        return new WebUserInfo(true, user.getUsername(), user.getNome(), user.getCognome(), user.getTipo());
+        return new WebUserInfo(user.getId(), true, user.getUsername(), user.getNome(), user.getCognome(), user.getTipo());
     }
 
     @PostMapping(value = "/api/user/auth", produces = MediaType.APPLICATION_JSON_VALUE)
