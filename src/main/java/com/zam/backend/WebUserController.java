@@ -81,11 +81,16 @@ public class WebUserController {
             return new WebGenericResponse(false, "Bad request");
         }
 
+        Optional<ZamUser> coordinatore = userRepository.findById(request.coord());
+        if(coordinatore.isEmpty()) {
+            return new WebGenericResponse(false, "No such user");
+        }
+
         // TODO: Aggiungere criteri password!
         // TODO: Aggiungere coordinatore!
         ZamUser newUser = new ZamUser(request.username(), "",
                 request.nome(), request.cognome(),
-                type, null);
+                type, coordinatore.get());
 
         try {
             newUser.setPassword(calculateHash(request.password()));
@@ -130,7 +135,7 @@ public class WebUserController {
         List<WebUserInfo> list = new ArrayList<>();
 
         for(ZamUser u : users) {
-            list.add(new WebUserInfo(u.getId(), true, u.getUsername(), u.getNome(), u.getCognome(), u.getTipo()));
+            list.add(new WebUserInfo(u.getId(), true, u.getUsername(), u.getNome(), u.getCognome(), u.getTipo(), u.getCoordInfo()));
         }
 
         return new WebUserTypeResponse(true, "OK", list);
@@ -143,11 +148,11 @@ public class WebUserController {
 
         if(user == null) {
             ZamLogger.warning("User not found for token " + token.token);
-            return new WebUserInfo(-1, false, null, null, null, null);
+            return new WebUserInfo(-1, false, null, null, null, null, null);
         }
 
         ZamLogger.log("User " + user.getUsername() + " found for token " + token.token);
-        return new WebUserInfo(user.getId(), true, user.getUsername(), user.getNome(), user.getCognome(), user.getTipo());
+        return new WebUserInfo(user.getId(), true, user.getUsername(), user.getNome(), user.getCognome(), user.getTipo(), user.getCoordInfo());
     }
 
     @PostMapping(value = "/api/user/auth", produces = MediaType.APPLICATION_JSON_VALUE)

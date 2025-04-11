@@ -73,6 +73,14 @@ public class ZamUser {
 
     public void setPassword(String password) { this.password = password; }
 
+    public WebCoordInfo getCoordInfo() {
+        if(this.getTipo() == ZamUserType.DIPENDENTE && this.getCoordinatore() != null) {
+            return new WebCoordInfo(this.getCoordinatore().getId(), this.getCoordinatore().getNome(), this.getCoordinatore().getCognome());
+        }
+
+        return null;
+    }
+
     public ZamUser clone() {
         return new ZamUser(this.username, this.password, this.nome, this.cognome, this.tipo, this.coordinatore);
     }
