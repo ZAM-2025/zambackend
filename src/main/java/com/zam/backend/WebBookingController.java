@@ -47,7 +47,47 @@ public class WebBookingController {
         for(ZamBooking booking : bookings) {
             if(booking.getIdUtente().getId() == user.getId()) {
                 ZamAsset asset = booking.getIdAsset();
-                out.add(new WebBookingAssoc(booking, asset.getNome(), asset.getPiano()));
+                out.add(new WebBookingAssoc(booking, asset.getNome(), asset.getPiano(), asset.getId()));
+            }
+        }
+
+        return out;
+    }
+
+    @PostMapping(value = "/api/booking/active", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Iterable<WebBookingAssoc> getActive(@RequestBody WebBookingRequest request) {
+        tokenRepository.clearTokens();
+
+        ZamUser user = this.tokenRepository.findUser(request.token());
+
+        List<WebBookingAssoc> out = new ArrayList<>();
+
+        Iterable<ZamBooking> bookings = bookingRepository.findAll();
+        for(ZamBooking booking : bookings) {
+            if(booking.getIdUtente().getId() == user.getId() && booking.getInizio().isAfter(LocalDateTime.now())) {
+                ZamAsset asset = booking.getIdAsset();
+                out.add(new WebBookingAssoc(booking, asset.getNome(), asset.getPiano(), asset.getId()));
+            }
+        }
+
+        return out;
+    }
+
+    @PostMapping(value = "/api/booking/inactive", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Iterable<WebBookingAssoc> getInactive(@RequestBody WebBookingRequest request) {
+        tokenRepository.clearTokens();
+
+        ZamUser user = this.tokenRepository.findUser(request.token());
+
+        List<WebBookingAssoc> out = new ArrayList<>();
+
+        Iterable<ZamBooking> bookings = bookingRepository.findAll();
+        for(ZamBooking booking : bookings) {
+            if(booking.getIdUtente().getId() == user.getId() && booking.getInizio().isBefore(LocalDateTime.now())) {
+                ZamAsset asset = booking.getIdAsset();
+                out.add(new WebBookingAssoc(booking, asset.getNome(), asset.getPiano(), asset.getId()));
             }
         }
 
@@ -125,6 +165,7 @@ public class WebBookingController {
         Optional<ZamAsset> asset = assetRepository.findById(request.asset());
 
         if(token == null || user == null || asset.isEmpty()) {
+            ZamLogger.error("DATIMANC: " + token + user + asset.isEmpty());
             return new WebGenericResponse(false, "Dati mancanti!");
         }
 

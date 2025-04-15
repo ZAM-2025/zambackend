@@ -33,4 +33,6 @@ public interface ZamUserRepository extends CrudRepository<ZamUser, Integer> {
 
         write(user.getNome(), user.getCognome(), user.getUsername(), user.getPassword(), tipo, coordinatore);
     }
+
+    int countZamUsersByTipo(ZamUserType tipo);
 }

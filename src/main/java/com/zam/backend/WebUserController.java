@@ -81,16 +81,31 @@ public class WebUserController {
             return new WebGenericResponse(false, "Bad request");
         }
 
-        Optional<ZamUser> coordinatore = userRepository.findById(request.coord());
-        if(coordinatore.isEmpty()) {
-            return new WebGenericResponse(false, "No such user");
+        if(request.coord() == null && type != ZamUserType.COORDINATORE) {
+            return new WebGenericResponse(false, "Bad request");
+        }
+
+        ZamUser coordinatore = null;
+
+        if(type == ZamUserType.COORDINATORE) {
+            int count = this.userRepository.countZamUsersByTipo(ZamUserType.COORDINATORE);
+
+            if(count >= 2) {
+                return new WebGenericResponse(false, "Limite di coordinatori raggiunto!");
+            }
+        } else {
+            Optional<ZamUser> _coordinatore = userRepository.findById(request.coord());
+            if(_coordinatore.isEmpty()) {
+                return new WebGenericResponse(false, "No such user");
+            } else {
+                coordinatore = _coordinatore.get();
+            }
         }
 
         // TODO: Aggiungere criteri password!
-        // TODO: Aggiungere coordinatore!
         ZamUser newUser = new ZamUser(request.username(), "",
                 request.nome(), request.cognome(),
-                type, coordinatore.get());
+                type, coordinatore);
 
         try {
             newUser.setPassword(calculateHash(request.password()));
@@ -99,6 +114,60 @@ public class WebUserController {
         }
 
         userRepository.save(newUser);
+        return new WebGenericResponse(true, "OK");
+    }
+
+    @PostMapping(value = "/api/user/edit", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public WebGenericResponse editUser(@RequestBody WebEditUserRequest request) {
+        ZamUser user = this.tokenRepository.findUser(request.token());
+        ZamUser editUser = this.userRepository.findById(request.id()).orElse(null);
+
+        if(user == null || editUser == null) {
+            return new WebGenericResponse(false, "No such user");
+        }
+
+        if(user.getTipo() != ZamUserType.GESTORE) {
+            return new WebGenericResponse(false, "Not allowed");
+        }
+
+        if(request.type() < 0 || request.type() > ZamUserType.values().length) {
+            return new WebGenericResponse(false, "Bad request");
+        }
+
+        ZamUserType type = ZamUserType.values()[request.type()];
+        if(type == ZamUserType.GESTORE) {
+            return new WebGenericResponse(false, "Bad request");
+        }
+
+        if(request.coord() == null && type != ZamUserType.COORDINATORE) {
+            return new WebGenericResponse(false, "Bad request");
+        }
+
+        ZamUser coordinatore = null;
+
+        if(type == ZamUserType.DIPENDENTE) {
+            Optional<ZamUser> _coordinatore = userRepository.findById(request.coord());
+            if(_coordinatore.isEmpty()) {
+                return new WebGenericResponse(false, "No such user");
+            } else {
+                coordinatore = _coordinatore.get();
+            }
+        }
+
+        // TODO: Aggiungere criteri password!
+        editUser.setUsername(request.username());
+        editUser.setNome(request.nome());
+        editUser.setCognome(request.cognome());
+        editUser.setCoordinatore(coordinatore);
+
+        try {
+            editUser.setPassword(calculateHash(request.password()));
+        } catch (NoSuchAlgorithmException e) {
+            return new WebGenericResponse(false, "Server error");
+        }
+
+        userRepository.save(editUser);
         return new WebGenericResponse(true, "OK");
     }
 

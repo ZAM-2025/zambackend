@@ -65,11 +65,15 @@ public class ZamUser {
 
     public ZamUserType getTipo() { return this.tipo; }
 
+    public void setUsername(String username) { this.username = username; }
+
     public void setNome(String nome) { this.nome = nome; }
 
     public void setCognome(String cognome) { this.cognome = cognome; }
 
     public void setTipo(ZamUserType tipo) { this.tipo = tipo; }
+
+    public void setCoordinatore(ZamUser coordinatore) { this.coordinatore = coordinatore; }
 
     public void setPassword(String password) { this.password = password; }
 
