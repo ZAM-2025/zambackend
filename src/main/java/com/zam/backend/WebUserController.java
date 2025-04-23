@@ -11,6 +11,8 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -18,9 +20,8 @@ public class WebUserController {
     @Autowired
     private final ZamUserRepository userRepository;
     private final ZamTokenRepository tokenRepository;
-
-    // TODO: Aggiungere creazione utente per coordinatori
-    // TODO: Aggiungere validazione password
+    private final String PASSWORD_REGEX = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+{}\\[\\]:;<>,.?~\\\\/-]).{8,}$";
+    private final String PASSWORD_ERROR = "La password inserita non soddisfa i criteri!\n(Minimo 8 caratteri, maiuscole e minuscole, almeno un numero e un simbolo)";
 
     @PostMapping(value = "/api/user/logout", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -59,9 +60,20 @@ public class WebUserController {
         return new WebGenericResponse(true, "OK");
     }
 
+    private boolean passwordIsValid(String password) {
+        Pattern pattern = Pattern.compile(PASSWORD_REGEX);
+        Matcher matcher = pattern.matcher(password);
+
+        return matcher.matches();
+    }
+
     @PostMapping(value = "/api/user/new", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public WebGenericResponse newUser(@RequestBody WebNewUserRequest request) {
+        if(!passwordIsValid(request.password())) {
+            return new WebGenericResponse(false, PASSWORD_ERROR);
+        }
+
         ZamUser user = this.tokenRepository.findUser(request.token());
 
         if(user == null) {
@@ -120,6 +132,10 @@ public class WebUserController {
     @PostMapping(value = "/api/user/edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public WebGenericResponse editUser(@RequestBody WebEditUserRequest request) {
+        if(!passwordIsValid(request.password())) {
+            return new WebGenericResponse(false, PASSWORD_ERROR);
+        }
+
         ZamUser user = this.tokenRepository.findUser(request.token());
         ZamUser editUser = this.userRepository.findById(request.id()).orElse(null);
 
