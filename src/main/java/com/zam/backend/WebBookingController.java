@@ -169,6 +169,10 @@ public class WebBookingController {
             return new WebGenericResponse(false, "Dati mancanti!");
         }
 
+        if(!asset.get().isActive()) {
+            return new WebGenericResponse(false, "Asset non attivo!");
+        }
+
         Iterable<ZamBooking> bookings = bookingRepository.findZamBookingByIdAsset(asset.get());
 
         switch(user.getTipo()) {

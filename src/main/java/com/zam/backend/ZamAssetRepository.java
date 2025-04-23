@@ -9,4 +9,7 @@ import org.springframework.data.repository.query.Param;
 public interface ZamAssetRepository extends CrudRepository<ZamAsset, Integer> {
     public Iterable<ZamAsset> findAll();
     public Iterable<ZamAsset> findByPiano(Integer piano);
+
+    Iterable<ZamAsset> findByAttivo(Boolean attivo);
+    Iterable<ZamAsset> findByPianoAndAttivo(Integer piano, Boolean attivo);
 }

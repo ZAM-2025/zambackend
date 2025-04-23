@@ -28,14 +28,18 @@ public class ZamAsset {
     @Column(name = "piano")
     private Integer piano;
 
+    @Column(name = "attivo")
+    private Boolean attivo;
+
     protected ZamAsset() {}
 
-    public ZamAsset(ZamAssetStatus stato, ZamAssetType tipo, String coords, String nome, Integer piano) {
+    public ZamAsset(ZamAssetStatus stato, ZamAssetType tipo, String coords, String nome, Integer piano, Boolean attivo) {
         this.stato = stato;
         this.tipo = tipo;
         this.coords = coords;
         this.nome = nome;
         this.piano = piano;
+        this.attivo = attivo;
     }
 
     public Integer getId() {
@@ -53,6 +57,10 @@ public class ZamAsset {
     }
 
     public ZamAssetStatus getStato() { return this.stato; }
+
+    public void setActive(Boolean active) { this.attivo = active; }
+
+    public boolean isActive() { return this.attivo; }
 
     public ZamAssetType getTipo() { return this.tipo; }
 }
