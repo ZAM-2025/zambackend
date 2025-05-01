@@ -54,6 +54,46 @@ public class WebBookingController {
         return out;
     }
 
+    @PostMapping(value = "/api/booking/bookedby", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public WebUserBookingResponse getBookedByUser(@RequestBody WebUserBookingRequest request) {
+        tokenRepository.clearTokens();
+
+        ZamUser coord = this.tokenRepository.findUser(request.token());
+
+        if(coord == null) {
+            return new WebUserBookingResponse(false, "No such user", null);
+        }
+
+        Optional<ZamUser> user = this.userRepository.findById(coord.getId());
+        if(user.isEmpty()) {
+            return new WebUserBookingResponse(false, "No such user", null);
+        }
+
+        if(coord.getTipo() == ZamUserType.DIPENDENTE) {
+            return new WebUserBookingResponse(false, "Not allowed", null);
+        } else if (coord.getTipo() == ZamUserType.COORDINATORE) {
+            // I coordinatori possono vedere solo le prenotazioni dei propri utenti coordinati,
+            // e non quelle di altri coordinatori o gestori.
+            if(user.get().getCoordinatore().getId() != coord.getId() ||
+                user.get().getTipo() != ZamUserType.DIPENDENTE) {
+                return new WebUserBookingResponse(false, "Not allowed", null);
+            }
+        }
+
+        Iterable<ZamBooking> bookings = bookingRepository.findAll();
+
+        List<WebBookingAssoc> out = new ArrayList<>();
+        for(ZamBooking booking : bookings) {
+            if(booking.getIdUtente().getId() == user.get().getId()) {
+                ZamAsset asset = booking.getIdAsset();
+                out.add(new WebBookingAssoc(booking, asset.getNome(), asset.getPiano(), asset.getId()));
+            }
+        }
+
+        return new WebUserBookingResponse(true, "OK", out);
+    }
+
     @PostMapping(value = "/api/booking/active", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Iterable<WebBookingAssoc> getActive(@RequestBody WebBookingRequest request) {
@@ -72,6 +112,46 @@ public class WebBookingController {
         }
 
         return out;
+    }
+
+    @PostMapping(value = "/api/booking/activeby", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public WebUserBookingResponse getActiveByUser(@RequestBody WebUserBookingRequest request) {
+        tokenRepository.clearTokens();
+
+        ZamUser coord = this.tokenRepository.findUser(request.token());
+
+        if(coord == null) {
+            return new WebUserBookingResponse(false, "No such user", null);
+        }
+
+        Optional<ZamUser> user = this.userRepository.findById(coord.getId());
+        if(user.isEmpty()) {
+            return new WebUserBookingResponse(false, "No such user", null);
+        }
+
+        if(coord.getTipo() == ZamUserType.DIPENDENTE) {
+            return new WebUserBookingResponse(false, "Not allowed", null);
+        } else if (coord.getTipo() == ZamUserType.COORDINATORE) {
+            // I coordinatori possono vedere solo le prenotazioni dei propri utenti coordinati,
+            // e non quelle di altri coordinatori o gestori.
+            if(user.get().getCoordinatore().getId() != coord.getId() ||
+                    user.get().getTipo() != ZamUserType.DIPENDENTE) {
+                return new WebUserBookingResponse(false, "Not allowed", null);
+            }
+        }
+
+        Iterable<ZamBooking> bookings = bookingRepository.findAll();
+
+        List<WebBookingAssoc> out = new ArrayList<>();
+        for(ZamBooking booking : bookings) {
+            if(booking.getIdUtente().getId() == user.get().getId() && booking.getInizio().isAfter(LocalDateTime.now())) {
+                ZamAsset asset = booking.getIdAsset();
+                out.add(new WebBookingAssoc(booking, asset.getNome(), asset.getPiano(), asset.getId()));
+            }
+        }
+
+        return new WebUserBookingResponse(true, "OK", out);
     }
 
     @PostMapping(value = "/api/booking/inactive", produces = MediaType.APPLICATION_JSON_VALUE)
