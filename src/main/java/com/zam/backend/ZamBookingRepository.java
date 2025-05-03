@@ -8,4 +8,6 @@ public interface ZamBookingRepository extends CrudRepository<ZamBooking, Integer
     List<ZamBooking> findZamBookingByIdAsset(ZamAsset idAsset);
 
     void removeZamBookingByIdUtente(ZamUser idUtente);
+
+    List<ZamBooking> findByIdUtente(ZamUser idUtente);
 }

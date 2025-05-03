@@ -20,6 +20,17 @@ public class WebBookingController {
     private final ZamUserRepository userRepository;
     private final ZamTokenRepository tokenRepository;
 
+    private int getNumActiveForUser(ZamUser user) {
+        List<ZamBooking> bookings = bookingRepository.findByIdUtente(user);
+
+        for(ZamBooking booking : bookings) {
+            ZamLogger.log(booking.getInizio() + " " + booking.getFine() + " " + booking.isBooked());
+        }
+        bookings.removeIf(b -> !b.isBooked());
+
+        return bookings.size();
+    }
+
     @PostMapping(value = "/api/booking/asset", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Iterable<WebBookingAssetResponse> getByAsset(@RequestBody WebBookingAssetRequest request) {
@@ -28,7 +39,7 @@ public class WebBookingController {
 
         List<WebBookingAssetResponse> res = new ArrayList<>();
         for (ZamBooking booking : bookings) {
-            res.add(new WebBookingAssetResponse(booking, booking.getIdUtente().getId(), booking.isBooked()));
+            res.add(new WebBookingAssetResponse(booking, booking.getIdUtente().getId(), booking.isBooked(), booking.getIdUtente().getNome(), booking.getIdUtente().getCognome()));
         }
 
         return res;
@@ -302,12 +313,27 @@ public class WebBookingController {
                 }
             case ZamUserType.DIPENDENTE:
                 {
+                    int count = getNumActiveForUser(user);
+
+                    // l'utente «dipendente» potrà prenotare solo un asset
+                    if(count >= 1) {
+                        return new WebGenericResponse(false, "Numero massimo di prenotazioni raggiunto.");
+                    }
+
                     if(asset.get().getTipo() == ZamAssetType.C) {
                         return new WebGenericResponse(false, "Gli asset di tipo C non possono essere prenotati dai dipendenti!");
                     }
                 }
                 break;
             case ZamUserType.COORDINATORE:
+                {
+                    int count = getNumActiveForUser(user);
+
+                    // mentre l'utente «coordinatore» potrà prenotarne fino a 3 in contemporanea
+                    if(count >= 3) {
+                        return new WebGenericResponse(false, "Numero massimo di prenotazioni raggiunto.");
+                    }
+                }
                 break;
         }
 
