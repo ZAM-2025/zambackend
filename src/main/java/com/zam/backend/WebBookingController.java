@@ -20,15 +20,25 @@ public class WebBookingController {
     private final ZamUserRepository userRepository;
     private final ZamTokenRepository tokenRepository;
 
-    private int getNumActiveForUser(ZamUser user) {
+    private List<ZamBooking> getNumActiveForUser(ZamUser user) {
         List<ZamBooking> bookings = bookingRepository.findByIdUtente(user);
 
-        for(ZamBooking booking : bookings) {
-            ZamLogger.log(booking.getInizio() + " " + booking.getFine() + " " + booking.isBooked());
-        }
         bookings.removeIf(b -> !b.isBooked());
+        for(ZamBooking booking : bookings) {
+            ZamLogger.log(booking.getIdAsset().getNome() + " " + booking.isBooked());
+        }
 
-        return bookings.size();
+        return bookings;
+    }
+
+    private boolean bookingsHaveAsset(List<ZamBooking> active, ZamAsset asset) {
+        for(ZamBooking booking : active) {
+            if(booking.getIdAsset().getId().equals(asset.getId())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @PostMapping(value = "/api/booking/asset", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -58,7 +68,7 @@ public class WebBookingController {
 
         List<WebBookingAssetResponse> res = new ArrayList<>();
         for (ZamBooking booking : bookings) {
-            if(booking.getIdUtente().getCoordinatore() != null && booking.getIdUtente().getCoordinatore().getId() == user.getId()) {
+            if(user.getTipo() == ZamUserType.GESTORE || (booking.getIdUtente().getCoordinatore() != null && booking.getIdUtente().getCoordinatore().getId() == user.getId())) {
                 res.add(new WebBookingAssetResponse(booking, booking.getIdUtente().getId(), booking.isBooked(), booking.getIdUtente().getNome(), booking.getIdUtente().getCognome()));
             }
         }
@@ -334,10 +344,13 @@ public class WebBookingController {
                 }
             case ZamUserType.DIPENDENTE:
                 {
-                    int count = getNumActiveForUser(user);
+                    List<ZamBooking> active = getNumActiveForUser(user);
+                    int count = active.size();
+
+                    ZamLogger.log("COUNT " + count + " has: " + bookingsHaveAsset(active, asset.get()));
 
                     // l'utente «dipendente» potrà prenotare solo un asset
-                    if(count >= 1) {
+                    if(count >= 1 && bookingsHaveAsset(active, asset.get())) {
                         return new WebGenericResponse(false, "Numero massimo di prenotazioni raggiunto.");
                     }
 
@@ -348,10 +361,11 @@ public class WebBookingController {
                 break;
             case ZamUserType.COORDINATORE:
                 {
-                    int count = getNumActiveForUser(user);
+                    List<ZamBooking> active = getNumActiveForUser(user);
+                    int count = active.size();
 
                     // mentre l'utente «coordinatore» potrà prenotarne fino a 3 in contemporanea
-                    if(count >= 3) {
+                    if(count >= 3 && bookingsHaveAsset(active, asset.get())) {
                         return new WebGenericResponse(false, "Numero massimo di prenotazioni raggiunto.");
                     }
                 }
