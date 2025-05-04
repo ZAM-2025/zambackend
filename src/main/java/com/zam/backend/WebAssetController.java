@@ -3,6 +3,8 @@ package com.zam.backend;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -15,7 +17,12 @@ public class WebAssetController {
     @PostMapping(value = "/api/assets/all", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Iterable<ZamAsset> getAllAssets() {
-        return assetRepository.findAll();
+        List<ZamAsset> assets = assetRepository.findAll();
+
+        assets.sort(Comparator.comparing(ZamAsset::getNome));
+        assets.sort(Comparator.comparing(ZamAsset::getPiano));
+
+        return assets;
     }
 
     @PostMapping(value = "/api/assets/active", produces = MediaType.APPLICATION_JSON_VALUE)

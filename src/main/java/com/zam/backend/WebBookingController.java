@@ -45,6 +45,27 @@ public class WebBookingController {
         return res;
     }
 
+    @PostMapping(value = "/api/booking/assetfor", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Iterable<WebBookingAssetResponse> getByAssetCoord(@RequestBody WebBookingUserAssetRequest request) {
+        ZamUser user = tokenRepository.findUser(request.token());
+        if(user == null || user.getTipo() == ZamUserType.DIPENDENTE) {
+            return new ArrayList<>();
+        }
+
+        ZamAsset asset = assetRepository.findById(request.assetID()).get();
+        Iterable<ZamBooking> bookings = bookingRepository.findZamBookingByIdAsset(asset);
+
+        List<WebBookingAssetResponse> res = new ArrayList<>();
+        for (ZamBooking booking : bookings) {
+            if(booking.getIdUtente().getCoordinatore() != null && booking.getIdUtente().getCoordinatore().getId() == user.getId()) {
+                res.add(new WebBookingAssetResponse(booking, booking.getIdUtente().getId(), booking.isBooked(), booking.getIdUtente().getNome(), booking.getIdUtente().getCognome()));
+            }
+        }
+
+        return res;
+    }
+
     @PostMapping(value = "/api/booking/booked", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Iterable<WebBookingAssoc> getBooked(@RequestBody WebBookingRequest request) {

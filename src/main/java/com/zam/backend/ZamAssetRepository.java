@@ -6,8 +6,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface ZamAssetRepository extends CrudRepository<ZamAsset, Integer> {
-    public Iterable<ZamAsset> findAll();
+    public List<ZamAsset> findAll();
     public Iterable<ZamAsset> findByPiano(Integer piano);
 
     Iterable<ZamAsset> findByAttivo(Boolean attivo);

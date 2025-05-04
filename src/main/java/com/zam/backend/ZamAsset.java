@@ -1,6 +1,8 @@
 package com.zam.backend;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "asset")
@@ -13,10 +15,12 @@ public class ZamAsset {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "stato", columnDefinition = "statoasset")
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private ZamAssetStatus stato;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo", columnDefinition = "tipoasset")
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private ZamAssetType tipo;
 
     @Column(name = "coords")
