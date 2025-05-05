@@ -17,13 +17,13 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: zam-prova; Type: DATABASE; Schema: -; Owner: postgres
+-- Name: zam-prova; Type: DATABASE; Schema: -; Owner: matteofo
 --
 
-CREATE DATABASE "zam-prova" WITH TEMPLATE = template0 ENCODING = 'UTF8';
+CREATE DATABASE "zam-prova" WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE = 'it_IT.UTF-8';
 
 
-ALTER DATABASE "zam-prova" OWNER TO postgres;
+ALTER DATABASE "zam-prova" OWNER TO matteofo;
 
 \connect -reuse-previous=on "dbname='zam-prova'"
 
@@ -39,7 +39,7 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: _statoasset; Type: TYPE; Schema: public; Owner: postgres
+-- Name: _statoasset; Type: TYPE; Schema: public; Owner: matteofo
 --
 
 CREATE TYPE public._statoasset AS ENUM (
@@ -49,10 +49,10 @@ CREATE TYPE public._statoasset AS ENUM (
 );
 
 
-ALTER TYPE public._statoasset OWNER TO postgres;
+ALTER TYPE public._statoasset OWNER TO matteofo;
 
 --
--- Name: _tipoasset; Type: TYPE; Schema: public; Owner: postgres
+-- Name: _tipoasset; Type: TYPE; Schema: public; Owner: matteofo
 --
 
 CREATE TYPE public._tipoasset AS ENUM (
@@ -63,10 +63,10 @@ CREATE TYPE public._tipoasset AS ENUM (
 );
 
 
-ALTER TYPE public._tipoasset OWNER TO postgres;
+ALTER TYPE public._tipoasset OWNER TO matteofo;
 
 --
--- Name: _tipoutente; Type: TYPE; Schema: public; Owner: postgres
+-- Name: _tipoutente; Type: TYPE; Schema: public; Owner: matteofo
 --
 
 CREATE TYPE public._tipoutente AS ENUM (
@@ -76,7 +76,7 @@ CREATE TYPE public._tipoutente AS ENUM (
 );
 
 
-ALTER TYPE public._tipoutente OWNER TO postgres;
+ALTER TYPE public._tipoutente OWNER TO matteofo;
 
 --
 -- Name: statoasset; Type: TYPE; Schema: public; Owner: zam
@@ -132,7 +132,9 @@ CREATE TABLE public.asset (
     tipo public.tipoasset,
     coords text,
     nome text,
-    piano integer
+    piano integer,
+    attivo boolean,
+    ismarker boolean
 );
 
 
@@ -304,7 +306,7 @@ ALTER SEQUENCE public.utente_id_seq OWNED BY public.utente.id;
 
 
 --
--- Name: zamtoken; Type: TABLE; Schema: public; Owner: postgres
+-- Name: zamtoken; Type: TABLE; Schema: public; Owner: matteofo
 --
 
 CREATE TABLE public.zamtoken (
@@ -315,10 +317,10 @@ CREATE TABLE public.zamtoken (
 );
 
 
-ALTER TABLE public.zamtoken OWNER TO postgres;
+ALTER TABLE public.zamtoken OWNER TO matteofo;
 
 --
--- Name: zamtoken_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: zamtoken_id_seq; Type: SEQUENCE; Schema: public; Owner: matteofo
 --
 
 CREATE SEQUENCE public.zamtoken_id_seq
@@ -330,17 +332,17 @@ CREATE SEQUENCE public.zamtoken_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.zamtoken_id_seq OWNER TO postgres;
+ALTER TABLE public.zamtoken_id_seq OWNER TO matteofo;
 
 --
--- Name: zamtoken_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: zamtoken_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: matteofo
 --
 
 ALTER SEQUENCE public.zamtoken_id_seq OWNED BY public.zamtoken.id;
 
 
 --
--- Name: zamtoken_idutente_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: zamtoken_idutente_seq; Type: SEQUENCE; Schema: public; Owner: matteofo
 --
 
 CREATE SEQUENCE public.zamtoken_idutente_seq
@@ -352,10 +354,10 @@ CREATE SEQUENCE public.zamtoken_idutente_seq
     CACHE 1;
 
 
-ALTER TABLE public.zamtoken_idutente_seq OWNER TO postgres;
+ALTER TABLE public.zamtoken_idutente_seq OWNER TO matteofo;
 
 --
--- Name: zamtoken_idutente_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: zamtoken_idutente_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: matteofo
 --
 
 ALTER SEQUENCE public.zamtoken_idutente_seq OWNED BY public.zamtoken.idutente;
@@ -404,14 +406,14 @@ ALTER TABLE ONLY public.utente ALTER COLUMN coordinatore SET DEFAULT nextval('pu
 
 
 --
--- Name: zamtoken id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: zamtoken id; Type: DEFAULT; Schema: public; Owner: matteofo
 --
 
 ALTER TABLE ONLY public.zamtoken ALTER COLUMN id SET DEFAULT nextval('public.zamtoken_id_seq'::regclass);
 
 
 --
--- Name: zamtoken idutente; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: zamtoken idutente; Type: DEFAULT; Schema: public; Owner: matteofo
 --
 
 ALTER TABLE ONLY public.zamtoken ALTER COLUMN idutente SET DEFAULT nextval('public.zamtoken_idutente_seq'::regclass);
@@ -421,16 +423,73 @@ ALTER TABLE ONLY public.zamtoken ALTER COLUMN idutente SET DEFAULT nextval('publ
 -- Data for Name: asset; Type: TABLE DATA; Schema: public; Owner: zam
 --
 
-COPY public.asset (id, stato, tipo, coords, nome, piano) FROM stdin;
-10	LIBERO	B	[{"lat":-12.897489183755892,"lng":-87.71484375000001},{"lat":21.453068633086783,"lng":-87.80273437500001},{"lat":21.453068633086783,"lng":-29.794921875000004},{"lat":-12.811801316582619,"lng":-29.794921875000004}]	Sala Riunioni 1	1
-11	LIBERO	B	[{"lat":-51.6180165487737,"lng":-87.89062500000001},{"lat":-24.206889622398023,"lng":-87.71484375000001},{"lat":-24.686952411999144,"lng":-30.058593750000004},{"lat":-51.39920565355378,"lng":-29.707031250000004}]	Sala Riunioni 2	1
-12	LIBERO	B	[{"lat":21.616579336740603,"lng":-29.882812500000004},{"lat":-12.897489183755892,"lng":-29.707031250000004},{"lat":-12.554563528593656,"lng":28.4765625},{"lat":21.616579336740603,"lng":28.4765625}]	Sala Riunioni 3	1
-13	LIBERO	B	[{"lat":-24.5271348225978,"lng":-29.882812500000004},{"lat":-51.72702815704775,"lng":-29.794921875000004},{"lat":-51.39920565355378,"lng":28.125000000000004},{"lat":-24.44714958973082,"lng":28.300781250000004}]	Sala Riunioni 4	1
-14	LIBERO	A2	[{"lat":21.616579336740603,"lng":28.388671875000004},{"lat":-12.983147716796566,"lng":28.388671875000004},{"lat":-12.811801316582619,"lng":57.39257812500001},{"lat":21.37124437061832,"lng":57.30468750000001}]	Ufficio 1	1
-15	LIBERO	A2	[{"lat":-24.607069137709694,"lng":28.388671875000004},{"lat":-51.39920565355378,"lng":28.388671875000004},{"lat":-51.344338660599234,"lng":57.30468750000001},{"lat":-24.766784522874442,"lng":57.48046875000001}]	Ufficio 2	1
-16	LIBERO	A2	[{"lat":-12.983147716796566,"lng":86.48437500000001},{"lat":21.453068633086783,"lng":86.396484375},{"lat":21.453068633086783,"lng":57.568359375},{"lat":-12.811801316582619,"lng":57.48046875000001}]	Ufficio 3	1
-17	LIBERO	A2	[{"lat":-24.607069137709694,"lng":57.39257812500001},{"lat":-24.607069137709694,"lng":86.57226562500001},{"lat":-51.56341232867589,"lng":86.48437500000001},{"lat":-51.45400691005982,"lng":57.39257812500001}]	Ufficio 4	1
-18	LIBERO	A	[{"lat":51.39920565355378,"lng":100.72265625000001},{"lat":51.50874245880335,"lng":179.47265625000003},{"lat":-40.979898069620134,"lng":179.47265625000003},{"lat":-41.11246878918086,"lng":132.18750000000003},{"lat":5.528510525692801,"lng":131.92382812500003},{"lat":5.266007882805498,"lng":108.80859375000001},{"lat":4.915832801313164,"lng":100.63476562500001}]	Uffici Cubicles	1
+COPY public.asset (id, stato, tipo, coords, nome, piano, attivo, ismarker) FROM stdin;
+34	LIBERO	C	[{"lat":38.95940879245423,"lng":-27.949218750000004}]	Posto Auto Int. 5	0	t	t
+35	LIBERO	C	[{"lat":38.95940879245423,"lng":-11.953125000000002}]	Posto Auto Int. 6	0	t	t
+36	LIBERO	C	[{"lat":38.95940879245423,"lng":3.1640625000000004}]	Posto Auto Int. 7	0	t	t
+37	LIBERO	C	[{"lat":38.95940879245423,"lng":17.050781250000004}]	Posto Auto Int. 8	0	t	t
+38	LIBERO	C	[{"lat":-14.093957177836224,"lng":52.03125}]	Posto Auto Est. 1	0	t	t
+39	LIBERO	C	[{"lat":0.7031073524364909,"lng":52.03125}]	Posto Auto Est. 2	0	t	t
+40	LIBERO	C	[{"lat":19.311143355064655,"lng":52.03125}]	Posto Auto Est. 3	0	t	t
+41	LIBERO	C	[{"lat":33.7243396617476,"lng":52.03125}]	Posto Auto Est. 4	0	t	t
+12	LIBERO	B	[{"lat":21.616579336740603,"lng":-29.882812500000004},{"lat":-12.897489183755892,"lng":-29.707031250000004},{"lat":-12.554563528593656,"lng":28.4765625},{"lat":21.616579336740603,"lng":28.4765625}]	Sala Riunioni 3	1	t	f
+15	LIBERO	A2	[{"lat":-24.607069137709694,"lng":28.388671875000004},{"lat":-51.39920565355378,"lng":28.388671875000004},{"lat":-51.344338660599234,"lng":57.30468750000001},{"lat":-24.766784522874442,"lng":57.48046875000001}]	Ufficio 2	1	t	f
+49	LIBERO	A2	[{"lat":47.39834920035926,"lng":126.87500000000001}]	Scrivania 3	1	t	t
+51	LIBERO	A2	[{"lat":47.39834920035926,"lng":136.87500000000001}]	Scrivania 4	1	t	t
+52	LIBERO	A2	[{"lat":47.39834920035926,"lng":146.87500000000001}]	Scrivania 5	1	t	t
+53	LIBERO	A2	[{"lat":47.39834920035926,"lng":156.87500000000001}]	Cassettiera 1	1	t	t
+13	LIBERO	B	[{"lat":-24.5271348225978,"lng":-29.882812500000004},{"lat":-51.72702815704775,"lng":-29.794921875000004},{"lat":-51.39920565355378,"lng":28.125000000000004},{"lat":-24.44714958973082,"lng":28.300781250000004}]	Sala Riunioni 4	1	t	f
+10	LIBERO	B	[{"lat":-12.897489183755892,"lng":-87.71484375000001},{"lat":21.453068633086783,"lng":-87.80273437500001},{"lat":21.453068633086783,"lng":-29.794921875000004},{"lat":-12.811801316582619,"lng":-29.794921875000004}]	Sala Riunioni 1	1	t	f
+11	LIBERO	B	[{"lat":-51.6180165487737,"lng":-87.89062500000001},{"lat":-24.206889622398023,"lng":-87.71484375000001},{"lat":-24.686952411999144,"lng":-30.058593750000004},{"lat":-51.39920565355378,"lng":-29.707031250000004}]	Sala Riunioni 2	1	t	f
+14	LIBERO	A2	[{"lat":21.616579336740603,"lng":28.388671875000004},{"lat":-12.983147716796566,"lng":28.388671875000004},{"lat":-12.811801316582619,"lng":57.39257812500001},{"lat":21.37124437061832,"lng":57.30468750000001}]	Ufficio 1	1	t	f
+16	LIBERO	A2	[{"lat":-12.983147716796566,"lng":86.48437500000001},{"lat":21.453068633086783,"lng":86.396484375},{"lat":21.453068633086783,"lng":57.568359375},{"lat":-12.811801316582619,"lng":57.48046875000001}]	Ufficio 3	1	t	f
+54	LIBERO	A2	[{"lat":37.39834920035926,"lng":146.87500000000001}]	Cassettiera 2	1	t	t
+55	LIBERO	A2	[{"lat":47.39834920035926,"lng":166.87500000000001}]	Scrivania 6	1	t	t
+56	LIBERO	A2	[{"lat":37.39834920035926,"lng":166.87500000000001}]	Cassettiera 3	1	t	t
+57	LIBERO	A2	[{"lat":37.39834920035926,"lng":173.87500000000001}]	Cassettiera 4	1	t	t
+58	LIBERO	A2	[{"lat":27.39834920035926,"lng":173.87500000000001}]	Scrivania 7	1	t	t
+59	LIBERO	A2	[{"lat":27.39834920035926,"lng":166.87500000000001}]	Cassettiera 5	1	t	t
+60	LIBERO	A	[{"lat":17.39834920035926,"lng":173.87500000000001}]	Scrivania A1	1	t	t
+61	LIBERO	A	[{"lat":7.39834920035926,"lng":173.87500000000001}]	Scrivania A2	1	t	t
+62	LIBERO	A	[{"lat":-4.39834920035926,"lng":173.87500000000001}]	Scrivania A3	1	t	t
+63	LIBERO	A	[{"lat":-4.39834920035926,"lng":163.87500000000001}]	Cassettiera A1	1	t	t
+64	LIBERO	A	[{"lat":-11.39834920035926,"lng":173.87500000000001}]	Scrivania A4	1	t	t
+65	LIBERO	A	[{"lat":-21.39834920035926,"lng":173.87500000000001}]	Scrivania A5	1	t	t
+66	LIBERO	A	[{"lat":-21.39834920035926,"lng":163.87500000000001}]	Cassettiera A2	1	t	t
+67	LIBERO	A2	[{"lat":47.39834920035926,"lng":156.87500000000001}]	Cassettiera 6	2	t	t
+68	LIBERO	A2	[{"lat":37.39834920035926,"lng":146.87500000000001}]	Cassettiera 7	2	t	t
+69	LIBERO	A2	[{"lat":37.39834920035926,"lng":166.87500000000001}]	Cassettiera 8	2	t	t
+70	LIBERO	A2	[{"lat":37.39834920035926,"lng":173.87500000000001}]	Cassettiera 9	2	t	t
+71	LIBERO	A2	[{"lat":27.39834920035926,"lng":166.87500000000001}]	Cassettiera 10	2	t	t
+72	LIBERO	A	[{"lat":-4.39834920035926,"lng":163.87500000000001}]	Cassettiera A3	2	t	t
+73	LIBERO	A	[{"lat":-21.39834920035926,"lng":163.87500000000001}]	Cassettiera A4	2	t	t
+74	LIBERO	A2	[{"lat":47.39834920035926,"lng":106.87500000000001}]	Scrivania 8	2	t	t
+75	LIBERO	A2	[{"lat":47.39834920035926,"lng":116.87500000000001}]	Scrivania 9	2	t	t
+76	LIBERO	A2	[{"lat":47.39834920035926,"lng":126.87500000000001}]	Scrivania 10	2	t	t
+77	LIBERO	A2	[{"lat":47.39834920035926,"lng":136.87500000000001}]	Scrivania 11	2	t	t
+78	LIBERO	A2	[{"lat":47.39834920035926,"lng":146.87500000000001}]	Scrivania 12	2	t	t
+79	LIBERO	A2	[{"lat":47.39834920035926,"lng":166.87500000000001}]	Scrivania 13	2	t	t
+80	LIBERO	A2	[{"lat":27.39834920035926,"lng":173.87500000000001}]	Scrivania 14	2	t	t
+81	LIBERO	A	[{"lat":17.39834920035926,"lng":173.87500000000001}]	Scrivania A6	2	t	t
+82	LIBERO	A	[{"lat":7.39834920035926,"lng":173.87500000000001}]	Scrivania A7	2	t	t
+83	LIBERO	A	[{"lat":-4.39834920035926,"lng":173.87500000000001}]	Scrivania A8	2	t	t
+84	LIBERO	A	[{"lat":-11.39834920035926,"lng":173.87500000000001}]	Scrivania A9	2	t	t
+17	LIBERO	A2	[{"lat":-24.607069137709694,"lng":57.39257812500001},{"lat":-24.607069137709694,"lng":86.57226562500001},{"lat":-51.56341232867589,"lng":86.48437500000001},{"lat":-51.45400691005982,"lng":57.39257812500001}]	Ufficio 4	1	t	f
+19	LIBERO	B	[{"lat":-12.897489183755892,"lng":-87.71484375000001},{"lat":21.453068633086783,"lng":-87.80273437500001},{"lat":21.453068633086783,"lng":-29.794921875000004},{"lat":-12.811801316582619,"lng":-29.794921875000004}]	Sala Riunioni 5	2	t	f
+20	LIBERO	B	[{"lat":-51.6180165487737,"lng":-87.89062500000001},{"lat":-24.206889622398023,"lng":-87.71484375000001},{"lat":-24.686952411999144,"lng":-30.058593750000004},{"lat":-51.39920565355378,"lng":-29.707031250000004}]	Sala Riunioni 6	2	t	f
+33	LIBERO	C	[{"lat":6.315298538330033,"lng":-42.01171875000001}]	Posto Auto Int. 4	0	t	t
+24	LIBERO	A2	[{"lat":-24.607069137709694,"lng":28.388671875000004},{"lat":-51.39920565355378,"lng":28.388671875000004},{"lat":-51.344338660599234,"lng":57.30468750000001},{"lat":-24.766784522874442,"lng":57.48046875000001}]	Ufficio 6	2	t	f
+43	LIBERO	A2	[{"lat":47.39834920035926,"lng":106.87500000000001}]	Scrivania 1	1	t	t
+31	LIBERO	C	[{"lat":29.6880527498568,"lng":-42.01171875000001}]	Posto Auto Int. 2	0	t	t
+21	LIBERO	B	[{"lat":21.616579336740603,"lng":-29.882812500000004},{"lat":-12.897489183755892,"lng":-29.707031250000004},{"lat":-12.554563528593656,"lng":28.4765625},{"lat":21.616579336740603,"lng":28.4765625}]	Sala Riunioni 7	2	t	f
+22	LIBERO	B	[{"lat":-24.5271348225978,"lng":-29.882812500000004},{"lat":-51.72702815704775,"lng":-29.794921875000004},{"lat":-51.39920565355378,"lng":28.125000000000004},{"lat":-24.44714958973082,"lng":28.300781250000004}]	Sala Riunioni 8	2	t	f
+23	LIBERO	A2	[{"lat":21.616579336740603,"lng":28.388671875000004},{"lat":-12.983147716796566,"lng":28.388671875000004},{"lat":-12.811801316582619,"lng":57.39257812500001},{"lat":21.37124437061832,"lng":57.30468750000001}]	Ufficio 5	2	t	f
+26	LIBERO	A2	[{"lat":-24.607069137709694,"lng":57.39257812500001},{"lat":-24.607069137709694,"lng":86.57226562500001},{"lat":-51.56341232867589,"lng":86.48437500000001},{"lat":-51.45400691005982,"lng":57.39257812500001}]	Ufficio 8	2	t	f
+25	LIBERO	A2	[{"lat":-12.983147716796566,"lng":86.48437500000001},{"lat":21.453068633086783,"lng":86.396484375},{"lat":21.453068633086783,"lng":57.568359375},{"lat":-12.811801316582619,"lng":57.48046875000001}]	Ufficio 7	2	t	f
+46	LIBERO	A2	[{"lat":47.39834920035926,"lng":116.87500000000001}]	Scrivania 2	1	t	t
+85	LIBERO	A	[{"lat":-21.39834920035926,"lng":173.87500000000001}]	Scrivania A10	2	t	t
+32	LIBERO	C	[{"lat":18.47960905583198,"lng":-42.01171875000001}]	Posto Auto Int. 3	0	t	t
+30	LIBERO	C	[{"lat":38.95940879245423,"lng":-42.01171875000001}]	Posto Auto Int. 1	0	t	t
 \.
 
 
@@ -439,9 +498,6 @@ COPY public.asset (id, stato, tipo, coords, nome, piano) FROM stdin;
 --
 
 COPY public.prenotazione (id, inizio, fine, nmod, id_utente, id_asset) FROM stdin;
-41	2025-03-11 11:52:00	2025-03-11 13:52:00	0	1	10
-42	2025-03-26 11:16:00	2025-03-26 14:17:00	0	0	10
-43	2025-03-14 09:37:00	2025-03-14 14:37:00	0	0	10
 \.
 
 
@@ -454,15 +510,16 @@ COPY public.utente (id, nome, cognome, username, password, tipo, coordinatore) F
 0	Matteo	Forlani	m.forlani	Ylil4Ot3KRHU+SvltdsOFFEe2+AdHQ3dHVosuduaVro=	COORDINATORE	\N
 3	Francesco	Giaquinto	f.giaquinto	Ylil4Ot3KRHU+SvltdsOFFEe2+AdHQ3dHVosuduaVro=	GESTORE	\N
 1	Giacomo	Agatan	g.agatan	Ylil4Ot3KRHU+SvltdsOFFEe2+AdHQ3dHVosuduaVro=	DIPENDENTE	0
+8	Erica	Lodola	e.lodola	JydJ8tKPphUl5Y0LYCgX7DIH2ZnCVblMSS8YT30yZRA=	COORDINATORE	\N
 \.
 
 
 --
--- Data for Name: zamtoken; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: zamtoken; Type: TABLE DATA; Schema: public; Owner: matteofo
 --
 
 COPY public.zamtoken (id, val, idutente, created) FROM stdin;
-68	b82976ad-7588-40dc-aa13-417011dd4462	3	2025-03-14 08:45:31.034754
+148	632d0b6f-b6e1-4b85-82e4-a98bf4159b5f	3	2025-05-05 19:55:10.397552
 \.
 
 
@@ -470,7 +527,7 @@ COPY public.zamtoken (id, val, idutente, created) FROM stdin;
 -- Name: asset_id_seq; Type: SEQUENCE SET; Schema: public; Owner: zam
 --
 
-SELECT pg_catalog.setval('public.asset_id_seq', 18, true);
+SELECT pg_catalog.setval('public.asset_id_seq', 85, true);
 
 
 --
@@ -484,7 +541,7 @@ SELECT pg_catalog.setval('public.prenotare_id_asset_seq', 1, false);
 -- Name: prenotare_id_seq; Type: SEQUENCE SET; Schema: public; Owner: zam
 --
 
-SELECT pg_catalog.setval('public.prenotare_id_seq', 43, true);
+SELECT pg_catalog.setval('public.prenotare_id_seq', 75, true);
 
 
 --
@@ -505,18 +562,18 @@ SELECT pg_catalog.setval('public.utente_coordinatore_seq', 1, false);
 -- Name: utente_id_seq; Type: SEQUENCE SET; Schema: public; Owner: zam
 --
 
-SELECT pg_catalog.setval('public.utente_id_seq', 3, true);
+SELECT pg_catalog.setval('public.utente_id_seq', 18, true);
 
 
 --
--- Name: zamtoken_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: zamtoken_id_seq; Type: SEQUENCE SET; Schema: public; Owner: matteofo
 --
 
-SELECT pg_catalog.setval('public.zamtoken_id_seq', 68, true);
+SELECT pg_catalog.setval('public.zamtoken_id_seq', 148, true);
 
 
 --
--- Name: zamtoken_idutente_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: zamtoken_idutente_seq; Type: SEQUENCE SET; Schema: public; Owner: matteofo
 --
 
 SELECT pg_catalog.setval('public.zamtoken_idutente_seq', 1, false);
@@ -547,7 +604,7 @@ ALTER TABLE ONLY public.utente
 
 
 --
--- Name: zamtoken zamtoken_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: zamtoken zamtoken_pkey; Type: CONSTRAINT; Schema: public; Owner: matteofo
 --
 
 ALTER TABLE ONLY public.zamtoken
@@ -567,7 +624,7 @@ ALTER TABLE ONLY public.prenotazione
 --
 
 ALTER TABLE ONLY public.prenotazione
-    ADD CONSTRAINT prenotare_id_utente_fkey FOREIGN KEY (id_utente) REFERENCES public.utente(id);
+    ADD CONSTRAINT prenotare_id_utente_fkey FOREIGN KEY (id_utente) REFERENCES public.utente(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -579,15 +636,15 @@ ALTER TABLE ONLY public.utente
 
 
 --
--- Name: zamtoken zamtoken_idutente_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: zamtoken zamtoken_idutente_fkey; Type: FK CONSTRAINT; Schema: public; Owner: matteofo
 --
 
 ALTER TABLE ONLY public.zamtoken
-    ADD CONSTRAINT zamtoken_idutente_fkey FOREIGN KEY (idutente) REFERENCES public.utente(id);
+    ADD CONSTRAINT zamtoken_idutente_fkey FOREIGN KEY (idutente) REFERENCES public.utente(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- Name: SCHEMA public; Type: ACL; Schema: -; Owner: postgres
+-- Name: SCHEMA public; Type: ACL; Schema: -; Owner: matteofo
 --
 
 GRANT USAGE ON SCHEMA public TO zam;

@@ -23,6 +23,9 @@ public class ZamAsset {
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private ZamAssetType tipo;
 
+    @Column(name = "ismarker")
+    private Boolean isMarker;
+
     @Column(name = "coords")
     private String coords;
 
@@ -37,13 +40,14 @@ public class ZamAsset {
 
     protected ZamAsset() {}
 
-    public ZamAsset(ZamAssetStatus stato, ZamAssetType tipo, String coords, String nome, Integer piano, Boolean attivo) {
+    public ZamAsset(ZamAssetStatus stato, ZamAssetType tipo, String coords, String nome, Integer piano, Boolean attivo, Boolean isMarker) {
         this.stato = stato;
         this.tipo = tipo;
         this.coords = coords;
         this.nome = nome;
         this.piano = piano;
         this.attivo = attivo;
+        this.isMarker = isMarker;
     }
 
     public Integer getId() {
@@ -55,6 +59,8 @@ public class ZamAsset {
     public String getNome() { return nome; }
 
     public Integer getPiano() { return piano; }
+
+    public Boolean getIsMarker() { return isMarker; }
 
     public void setId(Integer id) {
         this.id = id;
