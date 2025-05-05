@@ -40,6 +40,7 @@ public class WebUserController {
     @PostMapping(value = "/api/user/delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public WebGenericResponse deleteUser(@RequestBody WebDeleteUserRequest request) {
+        tokenRepository.clearTokens();
         ZamUser user = this.tokenRepository.findUser(request.token());
 
         if(user == null) {
@@ -67,6 +68,38 @@ public class WebUserController {
         return matcher.matches();
     }
 
+    @PostMapping(value = "/api/user/coord", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<ZamUser> getCoordinatedUsers(@RequestBody ZamAuthToken request) {
+        tokenRepository.clearTokens();
+        ZamUser user = this.tokenRepository.findUser(request.token);
+
+        if(user == null) {
+            return new ArrayList<>();
+        }
+
+        if(user.getTipo() == ZamUserType.DIPENDENTE) {
+            return new ArrayList<>();
+        }
+
+        List<ZamUser> users = new ArrayList<>();
+
+        if(user.getTipo() == ZamUserType.COORDINATORE) {
+            users = userRepository.findByCoordinatore(user);
+            for(ZamUser u : users) {
+                u.setPassword(null);
+            }
+        } else if(user.getTipo() == ZamUserType.GESTORE) {
+            users = (List<ZamUser>) userRepository.findAll();
+            for(ZamUser u : users) {
+                u.setPassword(null);
+            }
+            users.removeIf(u -> u.getId() == user.getId());
+        }
+
+        return users;
+    }
+
     @PostMapping(value = "/api/user/new", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public WebGenericResponse newUser(@RequestBody WebNewUserRequest request) {
@@ -74,6 +107,7 @@ public class WebUserController {
             return new WebGenericResponse(false, PASSWORD_ERROR);
         }
 
+        tokenRepository.clearTokens();
         ZamUser user = this.tokenRepository.findUser(request.token());
 
         if(user == null) {
@@ -136,6 +170,8 @@ public class WebUserController {
             return new WebGenericResponse(false, PASSWORD_ERROR);
         }
 
+        tokenRepository.clearTokens();
+
         ZamUser user = this.tokenRepository.findUser(request.token());
         ZamUser editUser = this.userRepository.findById(request.id()).orElse(null);
 
@@ -190,6 +226,8 @@ public class WebUserController {
     @PostMapping(value = "/api/user/type", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public WebUserTypeResponse getUserInfoByType(@RequestBody WebUserTypeRequest request) {
+        tokenRepository.clearTokens();
+
         ZamUser user = this.tokenRepository.findUser(request.token());
 
         if(user == null) {
@@ -229,6 +267,7 @@ public class WebUserController {
     @PostMapping(value = "/api/user/info", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public WebUserInfo getUserInfo(@RequestBody ZamAuthToken token) {
+        tokenRepository.clearTokens();
         ZamUser user = this.tokenRepository.findUser(token.token);
 
         if(user == null) {

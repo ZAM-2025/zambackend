@@ -64,11 +64,16 @@ public class WebBookingController {
         }
 
         ZamAsset asset = assetRepository.findById(request.assetID()).get();
-        Iterable<ZamBooking> bookings = bookingRepository.findZamBookingByIdAsset(asset);
+        List<ZamBooking> bookings = bookingRepository.findZamBookingByIdAsset(asset);
+
+        bookings.removeIf(b -> b.getFine().isBefore(LocalDateTime.now()));
 
         List<WebBookingAssetResponse> res = new ArrayList<>();
         for (ZamBooking booking : bookings) {
-            if(user.getTipo() == ZamUserType.GESTORE || (booking.getIdUtente().getCoordinatore() != null && booking.getIdUtente().getCoordinatore().getId() == user.getId())) {
+            if(user.getTipo() == ZamUserType.GESTORE ||
+                (booking.getIdUtente().getCoordinatore() != null
+                && booking.getIdUtente().getCoordinatore().getId() == user.getId())
+            ) {
                 res.add(new WebBookingAssetResponse(booking, booking.getIdUtente().getId(), booking.isBooked(), booking.getIdUtente().getNome(), booking.getIdUtente().getCognome()));
             }
         }
@@ -89,7 +94,7 @@ public class WebBookingController {
         for(ZamBooking booking : bookings) {
             if(booking.getIdUtente().getId() == user.getId()) {
                 ZamAsset asset = booking.getIdAsset();
-                out.add(new WebBookingAssoc(booking, asset.getNome(), asset.getPiano(), asset.getId()));
+                out.add(new WebBookingAssoc(booking, asset.getNome(), asset.getPiano(), asset.getId(), asset.isActive()));
             }
         }
 
@@ -107,7 +112,7 @@ public class WebBookingController {
             return new WebUserBookingResponse(false, "No such user", null);
         }
 
-        Optional<ZamUser> user = this.userRepository.findById(coord.getId());
+        Optional<ZamUser> user = this.userRepository.findById(request.userID());
         if(user.isEmpty()) {
             return new WebUserBookingResponse(false, "No such user", null);
         }
@@ -129,7 +134,7 @@ public class WebBookingController {
         for(ZamBooking booking : bookings) {
             if(booking.getIdUtente().getId() == user.get().getId()) {
                 ZamAsset asset = booking.getIdAsset();
-                out.add(new WebBookingAssoc(booking, asset.getNome(), asset.getPiano(), asset.getId()));
+                out.add(new WebBookingAssoc(booking, asset.getNome(), asset.getPiano(), asset.getId(), asset.isActive()));
             }
         }
 
@@ -149,7 +154,7 @@ public class WebBookingController {
         for(ZamBooking booking : bookings) {
             if(booking.getIdUtente().getId() == user.getId() && booking.getInizio().isAfter(LocalDateTime.now())) {
                 ZamAsset asset = booking.getIdAsset();
-                out.add(new WebBookingAssoc(booking, asset.getNome(), asset.getPiano(), asset.getId()));
+                out.add(new WebBookingAssoc(booking, asset.getNome(), asset.getPiano(), asset.getId(), asset.isActive()));
             }
         }
 
@@ -189,7 +194,7 @@ public class WebBookingController {
         for(ZamBooking booking : bookings) {
             if(booking.getIdUtente().getId() == user.get().getId() && booking.getInizio().isAfter(LocalDateTime.now())) {
                 ZamAsset asset = booking.getIdAsset();
-                out.add(new WebBookingAssoc(booking, asset.getNome(), asset.getPiano(), asset.getId()));
+                out.add(new WebBookingAssoc(booking, asset.getNome(), asset.getPiano(), asset.getId(), asset.isActive()));
             }
         }
 
@@ -209,7 +214,7 @@ public class WebBookingController {
         for(ZamBooking booking : bookings) {
             if(booking.getIdUtente().getId() == user.getId() && booking.getInizio().isBefore(LocalDateTime.now())) {
                 ZamAsset asset = booking.getIdAsset();
-                out.add(new WebBookingAssoc(booking, asset.getNome(), asset.getPiano(), asset.getId()));
+                out.add(new WebBookingAssoc(booking, asset.getNome(), asset.getPiano(), asset.getId(), asset.isActive()));
             }
         }
 
@@ -249,7 +254,7 @@ public class WebBookingController {
         for(ZamBooking booking : bookings) {
             if(booking.getIdUtente().getId() == user.get().getId() && booking.getInizio().isBefore(LocalDateTime.now())) {
                 ZamAsset asset = booking.getIdAsset();
-                out.add(new WebBookingAssoc(booking, asset.getNome(), asset.getPiano(), asset.getId()));
+                out.add(new WebBookingAssoc(booking, asset.getNome(), asset.getPiano(), asset.getId(), asset.isActive()));
             }
         }
 
@@ -269,6 +274,37 @@ public class WebBookingController {
                 return new WebGenericResponse(true, "OK");
             }
         }
+
+        return new WebGenericResponse(false, "Prenotazione non trovata!");
+    }
+
+    @PostMapping(value = "/api/booking/deletefor", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public WebGenericResponse deleteBookingForOther(@RequestBody WebBookingDeleteRequest request) {
+        tokenRepository.clearTokens();
+
+        ZamUser user = this.tokenRepository.findUser(request.token());
+
+        if(user.getTipo() == ZamUserType.DIPENDENTE) {
+            return new WebGenericResponse(false, "Not allowed");
+        }
+
+        if(user.getTipo() == ZamUserType.COORDINATORE) {
+            for(ZamBooking booking : bookingRepository.findAll()) {
+                if(request.bookingID().equals(booking.getId()) && booking.getIdUtente().getCoordinatore().getId() == user.getId()) {
+                    bookingRepository.delete(booking);
+                    return new WebGenericResponse(true, "OK");
+                }
+            }
+        } else if(user.getTipo() == ZamUserType.GESTORE) {
+            for(ZamBooking booking : bookingRepository.findAll()) {
+                if(request.bookingID().equals(booking.getId())) {
+                    bookingRepository.delete(booking);
+                    return new WebGenericResponse(true, "OK");
+                }
+            }
+        }
+
 
         return new WebGenericResponse(false, "Prenotazione non trovata!");
     }
@@ -403,12 +439,82 @@ public class WebBookingController {
             return new WebGenericResponse(false, "Dati mancanti!");
         }
 
+        if(!booking.get().getIdAsset().isActive()) {
+            return new WebGenericResponse(false, "Asset non attivo!");
+        }
+
         switch(user.getTipo()) {
             case ZamUserType.GESTORE:
                 break;
             case ZamUserType.DIPENDENTE, ZamUserType.COORDINATORE:
             {
                 if(user.getId() != booking.get().getIdUtente().getId()) {
+                    return new WebGenericResponse(false, "Utente errato.");
+                }
+
+                if(booking.get().getNmod() >= 2) {
+                    return new WebGenericResponse(false, "Numero massimo di modifiche superato!");
+                }
+            }
+            break;
+        }
+
+        //Iterable<ZamBooking> bookings = bookingRepository.findZamBookingByIdAsset(booking.get().getIdAsset());
+        //if (checkDoubleBooking(bookings, start, end)) {
+        //    return new WebGenericResponse(false, "L'asset è già prenotato nella fascia oraria!");
+        //}
+
+        // TODO: Gestire logica modifica (incremento nMod, cambio inizio e fine ecc.)
+        ZamBooking newBooking = new ZamBooking();
+
+        newBooking.setNmod(booking.get().getNmod() + 1);
+        newBooking.setIdAsset(booking.get().getIdAsset());
+        newBooking.setIdUtente(booking.get().getIdUtente());
+
+        newBooking.setInizio(start.toLocalDateTime());
+        newBooking.setFine(end.toLocalDateTime());
+
+        bookingRepository.delete(booking.get());
+        bookingRepository.save(newBooking);
+
+        return new WebGenericResponse(true, "OK");
+    }
+
+    @PostMapping(value = "/api/booking/editfor", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public WebGenericResponse editBookingForUser(@RequestBody WebBookingEditRequest request) {
+        tokenRepository.clearTokens();
+
+        ZonedDateTime start = convertDate(request.start());
+        ZonedDateTime end = convertDate(request.end());
+
+        WebGenericResponse validation = validateDates(start, end);
+        if(validation != null) {
+            return validation;
+        }
+
+        ZamToken token = tokenRepository.findZamTokenByVal(request.token());
+        ZamUser user = this.tokenRepository.findUser(request.token());
+        Optional<ZamBooking> booking = bookingRepository.findById(request.bookingID());
+
+        if(token == null || user == null || booking.isEmpty()) {
+            return new WebGenericResponse(false, "Dati mancanti!");
+        }
+
+        if(user.getTipo() == ZamUserType.DIPENDENTE) {
+            return new WebGenericResponse(false, "Not allowed");
+        }
+
+        if(!booking.get().getIdAsset().isActive()) {
+            return new WebGenericResponse(false, "Asset non attivo!");
+        }
+
+        switch(user.getTipo()) {
+            case ZamUserType.GESTORE:
+                break;
+            case ZamUserType.DIPENDENTE, ZamUserType.COORDINATORE:
+            {
+                if(user.getId() != booking.get().getIdUtente().getCoordinatore().getId()) {
                     return new WebGenericResponse(false, "Utente errato.");
                 }
 

@@ -35,4 +35,6 @@ public interface ZamUserRepository extends CrudRepository<ZamUser, Integer> {
     }
 
     int countZamUsersByTipo(ZamUserType tipo);
+
+    List<ZamUser> findByCoordinatore(ZamUser coordinatore);
 }
